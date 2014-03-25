@@ -1,0 +1,74 @@
+Please enter a query or command:
+/bool
+
+Boolean logic activated.
+
+Please enter a query or command:
+hexe
+
+
+Expression Tree:
+hexe
+
+3 results - took 2ms:
+        7: Der Froschkönig
+        11: Die Loreley
+        15: Hänsel und Gretel
+
+Please enter a query or command:
+hexe AND prinzessin
+
+
+Expression Tree:
+AndNode
+        hexe
+        prinzessin
+
+0 results - took 8ms:
+
+Please enter a query or command:
+(hexe AND prinzessin) OR (frosch AND könig AND tellerlein)
+
+
+Expression Tree:
+OR
+        AndNode
+                hexe
+                prinzessin
+        AndNode
+                AndNode
+                        frosch
+                        könig
+                tellerlein
+
+1 results - took 12ms:
+        7: Der Froschkönig
+
+Please enter a query or command:
+(hexe AND prinzessin) OR (NOT hexe AND könig)
+
+
+Expression Tree:
+OR
+        AndNode
+                hexe
+                prinzessin
+        AndNode
+                NOT
+                        hexe
+                könig
+
+11 results - took 13ms:
+        1: Aladin und die Wunderlampe
+        3: Aschenputtel
+        4: Das tapfere Schneiderlein
+        5: Der Drachentöter
+        8: Der gestiefelte Kater
+        10: Die goldene Gans
+        16: König Drosselbart
+        19: Prinzessin auf der Erbse
+        22: Rumpelstilzchen
+        23: Schneewittchen
+        26: Zwerg Nase
+
+Please enter a query or command:
