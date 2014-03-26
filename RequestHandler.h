@@ -1,14 +1,13 @@
-#include <string.h>
-#include <iostream>
-#include "RequestHandler.h"
-using namespace std;
+#ifndef REQUESTHANDLER_H
+#define REQUESTHANDLER_H
+
 class RequestHandler{
-public:
 	char input;
 	RequestHandler();
 	RequestHandler(char input);
-	
+
 	void printInputString(char input);
 	char parseToArray(char input);
-};
 
+};
+#endif // !REQUESTHANDLER_H

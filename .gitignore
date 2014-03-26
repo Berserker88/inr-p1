@@ -11,3 +11,7 @@
 *.lai
 *.la
 *.a
+
+# Visual Studio Project Files
+*.vcxproj
+*.vcxproj.filters
