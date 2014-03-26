@@ -76,7 +76,22 @@ int main( int argc, char** argv )
 	dict.makeIndexFromList(docs);
 	cout << "dict = " << dict.toString() << endl;
 	
-
+	string token = "oder";
+	list<Posting> plist = dict.get(token);
+	if(!plist.empty())
+	{
+		cout << "Success: " << token << " found!" << endl;
+		list<Posting>::iterator iter;
+		for(iter = plist.begin(); iter != plist.end(); iter++)
+			cout << iter->toString() << endl;
+	}
+	else
+	{
+		cout << "FAIL: " << token << " not found!" << endl;
+	}
+	
+	cout << "num of docs = " << docs.size() << endl;
+	
 	return 0;
 }
 
