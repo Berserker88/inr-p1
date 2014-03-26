@@ -1,13 +1,19 @@
 #ifndef REQUESTHANDLER_H
 #define REQUESTHANDLER_H
+#include <list>
+#include <string>
+
+using namespace std;
 
 class RequestHandler{
-	char input;
+private:
+	string _input;
+public:	
 	RequestHandler();
-	RequestHandler(char input);
-
-	void printInputString(char input);
-	char parseToArray(char input);
+	RequestHandler(string input);
+	string toString();
+	int getLength();
+	list<string> parseToList();
 
 };
 #endif // !REQUESTHANDLER_H
