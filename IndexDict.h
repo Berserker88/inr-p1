@@ -23,6 +23,7 @@ class IndexDict {
 		string toString() const;
 		
 		list<Posting> get(string token); 
+		int getTotFreq(string token);
 };
 
 

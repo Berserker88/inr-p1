@@ -87,6 +87,8 @@ int main( int argc, char** argv )
 		list<Posting>::iterator iter;
 		for(iter = plist.begin(); iter != plist.end(); iter++)
 			cout << iter->toString() << endl;
+		cout << "num of matches = " << plist.size() << endl;
+		cout << "total frequency of '" << token << "' = " << dict.getTotFreq(token) << endl;
 	}
 	else
 	{

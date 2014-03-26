@@ -119,6 +119,20 @@ list<Posting> IndexDict::get(string token) {
 }
 
 
+int IndexDict::getTotFreq(string token) {
+	Index idx(token);
+	
+	map<Index, list<Posting> >::iterator iter = _dict.find(idx);
+	
+	if(iter == _dict.end())
+	{
+		return 0;
+	}
+	
+	return iter->first.getTotFreq();
+}
+
+
 
 
 string IndexDict::toString() const {
