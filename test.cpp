@@ -23,16 +23,16 @@ int main( int argc, char** argv )
 
 	int tnum = 1;
 	
+	// create documents from directory path
 	list<Document *> docs = Document::getDocsFromDir("CorpusUTF8");
 	
+	// print documents loaded
 	list<Document *>::iterator iter;
 	for(iter = docs.begin(); iter != docs.end(); iter++)
 		cout << (*iter)->toString() << endl;
-
-
 	cout << endl << docs.front()->toString() << endl;
 
-
+	// create index dictionary
 	IndexDict dict;
 	
 	/*
@@ -73,13 +73,16 @@ int main( int argc, char** argv )
 	}
 	*/
 	
+	// build index of document list
 	dict.makeIndexFromList(docs);
 	cout << "dict = " << dict.toString() << endl;
 	
+	// query ONE string
 	string token = "oder";
 	list<Posting> plist = dict.get(token);
 	if(!plist.empty())
 	{
+		// print result
 		cout << "Success: " << token << " found!" << endl;
 		list<Posting>::iterator iter;
 		for(iter = plist.begin(); iter != plist.end(); iter++)
