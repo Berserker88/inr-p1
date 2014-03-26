@@ -15,6 +15,10 @@ class Posting {
 		int getFreq();
 		
 		string toString() const;
+		
+		bool operator==(const Posting& p) const;
+		bool operator<(const Posting& p) const;
+		bool operator>(const Posting& p) const;
 
 };
 

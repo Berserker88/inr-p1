@@ -22,6 +22,10 @@ class Document {
 		static list<Document *> getDocsFromDir(string dirpath);
 		
 		string toString() const;
+		
+		bool operator==(const Document& doc) const;
+		bool operator<(const Document& doc) const;
+		bool operator>(const Document& doc) const;
 };
 
 

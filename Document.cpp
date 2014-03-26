@@ -57,7 +57,19 @@ list<Document *> Document::getDocsFromDir(string dirpath) {
 
 
 
+bool Document::operator==(const Document& doc) const {
+	return _id == doc.getId();
+}
 
+
+bool Document::operator<(const Document& doc) const {
+	return _id < doc.getId();
+}
+
+
+bool Document::operator>(const Document& doc) const {
+	return _id > doc.getId();
+}
 
 
 

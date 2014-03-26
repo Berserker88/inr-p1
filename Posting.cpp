@@ -38,6 +38,28 @@ string Posting::toString() const {
 
 
 
+bool Posting::operator==(const Posting& p) const {
+	return _doc == p.getDoc();
+}
+
+
+bool Posting::operator<(const Posting& p) const {
+	return _doc < p.getDoc();
+}
+
+
+bool Posting::operator>(const Posting& p) const {
+	return _doc > p.getDoc();
+}
+
+
+
+
+
+
+
+
+
 
 
 
