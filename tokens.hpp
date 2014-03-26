@@ -6,6 +6,7 @@
 #include "tinydir.h"
 #include <list>
 #include <iostream>
+#include <sstream>
 using namespace std;
 list<string> tokenize(string filename);
 #endif

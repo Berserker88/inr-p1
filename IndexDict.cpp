@@ -3,6 +3,7 @@
 
 
 #include "IndexDict.h"
+#include "tokens.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -23,8 +24,9 @@ void IndexDict::makeIndexFromList(list<Document *> doclist) {
 
 void IndexDict::makeIndexFromDoc(Document *doc) {
 	
-	list<string> tokens;// = tokenize(doc->getFilename());
+	list<string> tokens = tokenize(doc->getFilename());
 	
+	/*
 	tokens.push_back("bla");
 	tokens.push_back("laber");
 	tokens.push_back("simon");
@@ -34,6 +36,7 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	tokens.push_back("bla");
 	tokens.push_back("laber");
 	tokens.push_back("gas");
+	*/
 	
 	tokens.sort();
 	
@@ -103,7 +106,16 @@ void IndexDict::clear() {
 list<Posting> IndexDict::get(string token) {
 	Index idx(token);
 	
+	map<Index, list<Posting> >::iterator iter = _dict.find(idx);
 	
+	
+	if(iter == _dict.end())
+	{
+		list<Posting> plist;
+		return plist;
+	}
+	
+	return iter->second;	
 }
 
 
@@ -118,9 +130,8 @@ string IndexDict::toString() const {
 	{
 		os << "{ " << iter->first.toString() << " } : { ";
 		list<Posting>::const_iterator it;
-		os << "{ ";
 		for(it = iter->second.begin(); it != iter->second.end(); it++)
-			os << it->toString() << ";";
+			os << " { " << it->toString() << " } ;";
 		os << " } " << endl;
 	}
 	
