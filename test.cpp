@@ -4,6 +4,7 @@
 
 
 #include <iostream>
+#include <ctime>
 #include "Document.h"
 #include "tinydir.h"
 #include "IndexDict.h"
@@ -27,6 +28,7 @@ int main( int argc, char** argv )
 	list<Document *> docs = Document::getDocsFromDir("CorpusUTF8");
 	
 	// print documents loaded
+	cout << "num of docs = " << docs.size() << endl;
 	list<Document *>::iterator iter;
 	for(iter = docs.begin(); iter != docs.end(); iter++)
 		cout << (*iter)->toString() << endl;
@@ -35,48 +37,13 @@ int main( int argc, char** argv )
 	// create index dictionary
 	IndexDict dict;
 	
-	/*
-	dict.makeIndexFromDoc(docs.front());
-	
-	cout << "dict = " << dict.toString() << endl;
-	
-	
-	cout << "Test " << tnum++ << ": " << endl;
-	string token = "laber";
-	list<Posting> plist = dict.get(token);
-	if(!plist.empty())
-	{
-		cout << "Success: " << token << " found!" << endl;
-		list<Posting>::iterator iter;
-		for(iter = plist.begin(); iter != plist.end(); iter++)
-			cout << iter->toString() << endl;
-	}
-	else
-	{
-		cout << "FAIL: " << token << " not found!" << endl;
-	}
-	
-	
-	cout << "Test " << tnum++ << ": " << endl;
-	token = "labers";
-	plist = dict.get(token);
-	if(plist.empty())
-	{
-		cout << "Success: " << token << " not found!" << endl;
-	}
-	else
-	{
-		cout << "FAIL: " << token << " found!" << endl;
-		list<Posting>::iterator iter;
-		for(iter = plist.begin(); iter != plist.end(); iter++)
-			cout << iter->toString() << endl;
-	}
-	*/
 	
 	// build index of document list
 	dict.makeIndexFromList(docs);
-	cout << "dict = " << dict.toString() << endl;
+	//cout << "dict = " << dict.toString() << endl;
 	
+	
+	/*
 	// query ONE string
 	string token = "oder";
 	list<Posting> plist = dict.get(token);
@@ -94,8 +61,34 @@ int main( int argc, char** argv )
 	{
 		cout << "FAIL: " << token << " not found!" << endl;
 	}
+	*/
 	
-	cout << "num of docs = " << docs.size() << endl;
+	
+	list<string> l;
+	//l.push_back("aladdin");
+	//l.push_back("prinzessin");
+	l.push_back("hexe");
+	//l.push_back("könig");
+	
+
+	list<Posting> res = dict.intersect(l);
+	
+	string query;
+	list<string>::iterator s_iter;
+	for(s_iter = l.begin(); s_iter != l.end(); s_iter++)
+	{
+		query += *s_iter + ",";
+	}
+
+
+	cout << "query result for '" << query << "':" << endl;
+	cout << "num of docs = " << res.size() << endl;
+	list<Posting>::iterator p_iter;
+	for(p_iter = res.begin(); p_iter != res.end(); p_iter++)
+		cout << p_iter->toString() << endl;
+	
+
+
 	
 	return 0;
 }

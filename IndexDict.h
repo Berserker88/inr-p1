@@ -24,6 +24,10 @@ class IndexDict {
 		
 		list<Posting> get(string token); 
 		int getTotFreq(string token);
+		Index getIndex(string token);
+		
+		list<Posting> intersect(list<string> terms);
+		list<Posting> intersect(list<Posting> pl1, list<Posting> pl2);
 };
 
 
