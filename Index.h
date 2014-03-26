@@ -17,8 +17,8 @@ class Index {
 		bool operator==(const Index& index) const;
 		bool operator<(const Index& index) const;
 		bool operator>(const Index& index) const;
-	
-		Index(string token, int freq = 0);
+		
+		Index(string token = "", int freq = 0);
 		void addDoc(int freq);
 		void addTotFreq(int freq);
 		void addNumDocs(int ndocs);
@@ -29,7 +29,7 @@ class Index {
 		int getTotFreq() const;
 		
 		string toString() const;
-
+		bool operator() (const Index& left, const Index& right) const;
 };
 
 

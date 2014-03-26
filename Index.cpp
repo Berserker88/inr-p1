@@ -64,6 +64,10 @@ bool Index::operator>(const Index& index) const {
 	return _token > index.getToken();
 }
 
+bool Index::operator() (const Index& left, const Index& right) const {
+
+}
+
 string Index::toString() const {
 	ostringstream os;
 	
