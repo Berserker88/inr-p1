@@ -11,8 +11,8 @@ class Posting {
 		
 	public:
 		Posting(Document *doc, int freq);
-		Document *getDoc();
-		int getFreq();
+		Document *getDoc() const;
+		int getFreq() const;
 		
 		string toString() const;
 		

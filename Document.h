@@ -15,8 +15,8 @@ class Document {
 	public:
 		Document(string filename);
 		
-		string getFilename();
-		int getId();
+		string getFilename() const;
+		int getId() const;
 		
 		static Document *getDocFromFile(string filename);
 		static list<Document *> getDocsFromDir(string dirpath);

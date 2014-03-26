@@ -16,11 +16,11 @@ Document::Document(string filename) {
 	_filename = filename;
 }
 		
-string Document::getFilename() {
+string Document::getFilename() const {
 	return _filename;
 }
 
-int Document::getId() {
+int Document::getId() const {
 	return _id;
 }
 

@@ -17,12 +17,12 @@ Posting::Posting(Document *doc, int freq) {
 
 
 
-Document *Posting::getDoc() {
+Document *Posting::getDoc() const {
 	return _doc;
 }
 
 
-int Posting::getFreq() {
+int Posting::getFreq() const {
 	return _freq;
 }
 
