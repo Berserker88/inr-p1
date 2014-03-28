@@ -11,7 +11,7 @@ class IndexDict {
 	
 	private:
 		map<Index, list<Posting> > _dict;
-		
+		list<Document *> _docs;
 		void addToDict(string token, Posting post);
 	
 	
@@ -22,12 +22,17 @@ class IndexDict {
 		void clear();
 		string toString() const;
 		
+		bool isNot(string token, bool removeIfFound = false);
+		
 		list<Posting> get(string token); 
 		int getTotFreq(string token);
 		Index getIndex(string token);
 		
 		list<Posting> intersect(list<string> terms);
 		list<Posting> intersect(list<Posting> pl1, list<Posting> pl2);
+		list<Posting> unionLists(list<Posting> pl1, list<Posting> pl2);
+		list<Posting> notList(list<Posting> pl);
+		list<Posting> mergeAndNot(list<Posting> pl1, list<Posting> pl2);
 };
 
 

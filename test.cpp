@@ -15,7 +15,13 @@
 using namespace std;
 
 
-
+void printRes(list<Posting> pl) {
+	cout << "Result:" << endl << "num of docs = " << pl.size() << endl;
+	list<Posting>::iterator p_iter;
+	for(p_iter = pl.begin(); p_iter != pl.end(); p_iter++)
+		cout << p_iter->toString() << endl;
+	cout << endl;
+}
 
 
 
@@ -64,28 +70,39 @@ int main( int argc, char** argv )
 	*/
 	
 	
-	list<string> l;
-	//l.push_back("aladdin");
-	//l.push_back("prinzessin");
-	l.push_back("hexe");
-	//l.push_back("könig");
+	list<string> l1, l2, l3;
+	l1.push_back("hexe");
+	l1.push_back("NOT könig");
+	l2.push_back("NOT aladdin");
+	l2.push_back("NOT prinzessin");
+	//l3.push_back("hänsel");
+	//l3.push_back("gretel");
+	l3.push_back("wald");
 	
 
-	list<Posting> res = dict.intersect(l);
+	list<Posting> res1 = dict.intersect(l1);
+	list<Posting> res2 = dict.intersect(l2);
+	list<Posting> res3 = dict.intersect(l3);
 	
+	list<Posting> res12 = dict.unionLists(res1, res2);
+	list<Posting> res123 = dict.unionLists(res12, res3);
+	
+	/*
 	string query;
 	list<string>::iterator s_iter;
 	for(s_iter = l.begin(); s_iter != l.end(); s_iter++)
 	{
 		query += *s_iter + ",";
 	}
-
-
 	cout << "query result for '" << query << "':" << endl;
-	cout << "num of docs = " << res.size() << endl;
-	list<Posting>::iterator p_iter;
-	for(p_iter = res.begin(); p_iter != res.end(); p_iter++)
-		cout << p_iter->toString() << endl;
+	*/
+	
+	printRes(res1);
+	printRes(res2);
+	printRes(res3);
+	printRes(res12);
+	printRes(res123);
+	
 	
 
 

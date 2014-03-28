@@ -10,7 +10,7 @@ class Posting {
 		int _freq;
 		
 	public:
-		Posting(Document *doc, int freq);
+		Posting(Document *doc, int freq = 0);
 		Document *getDoc() const;
 		int getFreq() const;
 		

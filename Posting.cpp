@@ -17,6 +17,8 @@ Posting::Posting(Document *doc, int freq) {
 
 
 
+
+
 Document *Posting::getDoc() const {
 	return _doc;
 }
