@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include "QueryParser.h"
 
 using namespace std;
 
