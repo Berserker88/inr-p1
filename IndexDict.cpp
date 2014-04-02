@@ -31,26 +31,10 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	
 	_docs.push_back(doc);
 	list<string> tokens = tokenize(doc->getFilename());
-	
-	/*
-	tokens.push_back("bla");
-	tokens.push_back("laber");
-	tokens.push_back("simon");
-	tokens.push_back("hans");
-	tokens.push_back("kuh");
-	tokens.push_back("laber");
-	tokens.push_back("bla");
-	tokens.push_back("laber");
-	tokens.push_back("gas");
-	*/
+
 	
 	tokens.sort();
 	
-	/*
-	list<string>::iterator iter = tokens.begin();
-	for(iter; iter != tokens.end(); iter++)
-		cout << *iter << endl;
-	*/
 	
 	map<string, int> freq;
 	
