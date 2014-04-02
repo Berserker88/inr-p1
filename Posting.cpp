@@ -10,13 +10,23 @@ using namespace std;
 
 
 
-Posting::Posting(Document *doc, int freq) {
+Posting::Posting(Document *doc, int freq, list<int> pos) {
 	_doc = doc;
 	_freq = freq;
+	_positions = pos;
 }
 
 
 
+list<int> Posting::getPositions() {
+	return _positions;
+}
+
+
+
+void Posting::addPosition(int pos) {
+	_positions.push_back(pos);
+}
 
 
 Document *Posting::getDoc() const {

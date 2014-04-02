@@ -8,11 +8,14 @@ class Posting {
 	private:
 		Document *_doc;
 		int _freq;
+		list<int> _positions;
 		
 	public:
-		Posting(Document *doc, int freq = 0);
+		Posting(Document *doc, int freq, list<int> pos);
 		Document *getDoc() const;
 		int getFreq() const;
+		list<int> getPositions();
+		void addPosition(int pos);
 		
 		string toString() const;
 		
