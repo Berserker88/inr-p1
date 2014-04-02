@@ -11,7 +11,7 @@
 
 
 static string NOT_PREFIX = "NOT ";
-
+static string DEBUG = "hexe";
 
 using namespace std;
 
@@ -31,12 +31,48 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	
 	_docs.push_back(doc);
 	list<string> tokens = tokenize(doc->getFilename());
-
 	
+	// with positions
+	map<string, list<int> > positions;
+	map<string, list<int> >::iterator find_iter;
+	
+	// initializing the positionlists
+	list<string>::iterator iter;
+	int pos = 1;
+	for(iter = tokens.begin(); iter != tokens.end(); iter++)
+	{
+		find_iter = positions.find(*iter);
+			
+		if(find_iter == positions.end())
+		{
+			list<int> firstpos;
+			firstpos.push_back(pos);
+			positions.insert(pair<string, list<int> >(*iter, firstpos));
+		}
+		else
+		{
+			find_iter->second.push_back(pos);
+		}
+		pos++;
+	}
+	
+	// adding Postings to dict
+	for(find_iter = positions.begin(); find_iter != positions.end(); find_iter++)
+	{
+		string token = find_iter->first;
+		//if(token == DEBUG)
+			//cout << token << " added to dict" << endl;
+		list<int> tok_pos = find_iter->second;
+		Posting p(doc, tok_pos);
+		addToDict(token, p);
+	}
+	
+	
+	
+	/*
+	// without positions
 	tokens.sort();
-	
-	
-	map<string, int> freq;
+
 	
 	
 	list<string>::iterator outer_iter, inner_iter;
@@ -47,6 +83,7 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	{
 		cnt = 1;
 		token = *outer_iter;
+		list<int> positions;
 
 		inner_iter = outer_iter;
 		inner_iter++;
@@ -60,6 +97,7 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 		Posting p(doc, cnt);
 		addToDict(token, p);
 	}
+	*/
 }
 
 
@@ -105,7 +143,7 @@ list<Posting> IndexDict::get(string token) {
 		return plist;
 	}
 	
-	return iter->second;	
+	return iter->second;
 }
 
 

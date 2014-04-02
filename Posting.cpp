@@ -10,11 +10,19 @@ using namespace std;
 
 
 
-Posting::Posting(Document *doc, int freq, list<int> pos) {
+Posting::Posting(Document *doc, int freq) {
 	_doc = doc;
 	_freq = freq;
-	_positions = pos;
 }
+
+
+
+Posting::Posting(Document *doc, list<int> poss) {
+	_doc = doc;
+	_positions = poss;
+	_freq = _positions.size();
+}
+
 
 
 
@@ -43,7 +51,13 @@ int Posting::getFreq() const {
 string Posting::toString() const {
 	ostringstream os;
 	
-	os << _doc->toString() << "; " << _freq;
+	os << _doc->toString() << "; " << _freq << "; <";
+	list<int>::const_iterator iter;
+	for(iter = _positions.begin(); iter != _positions.end(); iter++)
+	{
+		os << (*iter) << "; ";
+	}
+	os << ">";
 	
 	return os.str();
 }
