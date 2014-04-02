@@ -19,7 +19,7 @@ using namespace std;
 
 void printRes(list<Posting> pl, float time) {
 	cout.precision(3);
-	cout << pl.size() << " results  -  took " << time << " ms" << endl;
+	cout << pl.size() << " results  -  took " << time << " s" << endl;
 	list<Posting>::iterator p_iter;
 	for(p_iter = pl.begin(); p_iter != pl.end(); p_iter++)
 		cout << p_iter->toString() << endl;
@@ -49,17 +49,20 @@ int main( int argc, char** argv )
 	// print documents loaded
 	cout << "num of docs = " << docs.size() << endl;
 	list<Document *>::iterator iter;
-	//for(iter = docs.begin(); iter != docs.end(); iter++)
-	//	cout << (*iter)->toString() << endl;
+	for(iter = docs.begin(); iter != docs.end(); iter++)
+		cout << (*iter)->toString() << endl;
 	//cout << endl << docs.front()->toString() << endl;
 
 	// create index dictionary
 	IndexDict dict;
 	
 	
+	
 	// build index of document list
 	dict.makeIndexFromList(docs);
 	//cout << "dict = " << dict.toString() << endl;
+	
+	//printRes(dict.get("hexe"), 0.0);
 	
 	QueryParser qp(&dict);
 	string query;
@@ -77,9 +80,9 @@ int main( int argc, char** argv )
 		start = second();
 		result = qp.parseAndExecute(query);
 		stop = second();
-		cout << (float) start << endl;
-		cout << (float) stop << endl;
-		printRes(result, (stop-start) * 1000);
+		//cout << start << endl;
+		//cout << stop << endl;
+		printRes(result, (stop-start));
 	}
 	
 	
