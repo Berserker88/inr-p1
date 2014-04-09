@@ -20,7 +20,7 @@ class QueryParser {
 	public:
 		QueryParser(IndexDict *dict);
 		list<Posting> parseAndExecute(string query);
-
+		list<Posting> positionalParseAndExecute(string query);
 };
 
 
