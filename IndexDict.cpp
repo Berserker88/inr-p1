@@ -60,8 +60,6 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	for(find_iter = positions.begin(); find_iter != positions.end(); find_iter++)
 	{
 		string token = find_iter->first;
-		//if(token == DEBUG)
-			//cout << token << " added to dict" << endl;
 		list<int> tok_pos = find_iter->second;
 		Posting p(doc, tok_pos);
 		addToDict(token, p);
@@ -73,8 +71,6 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	// without positions
 	tokens.sort();
 
-	
-	
 	list<string>::iterator outer_iter, inner_iter;
 	string token;
 	int cnt;
@@ -440,6 +436,93 @@ list<Posting> IndexDict::unionLists(list<Posting> pl1, list<Posting> pl2) {
 	
 	return answer;
 }
+
+
+
+
+
+
+
+
+list<Posting> IndexDict::getPositional(string token1, string token2, string token3) {
+	
+	// get postinglist of intersect
+	
+	// positionalIntersect(token1, token2, 1)
+	// positionalIntersect(token2, token3, 1)
+	// positionalIntersect(token1, token3, 2)
+	
+}
+
+
+
+list<Posting> IndexDict::positionalIntersect(string token1, string token2, int k) {
+	
+	// positionalIntersect aus vorlesung
+	list<Posting> pl1 = get(token1);
+	list<Posting> pl2 = get(token2);
+	
+	list<Posting>::iterator p1 = pl1.begin();
+	list<Posting>::iterator p2 = pl2.begin();
+	
+	list<Posting> answer;
+
+	int docid1, docid2;
+	
+	while(p1 != pl1.end() && p2 != pl2.end())
+	{
+		docid1 = (*p1).getDoc()->getId();
+		docid2 = (*p2).getDoc()->getId();
+		
+		if(docid1 == docid2)
+		{
+			list<int> pos1 = (*p1).getPositions();
+			list<int> pos2 = (*p2).getPositions();
+			list<int> l;
+			
+			list<int>::iterator pp1 = pos1.begin();
+			list<int>::iterator pp2 = pos2.begin();
+			list<int>::iterator ps;
+			
+			while(pp1 != pos1.end())
+			{
+				while(pp2 != pos2.end())
+				{
+					if(abs(*pp1 - *pp2) <= k)
+						l.push_back(*pp2);
+					else if(*pp2 > *pp1)
+						break;
+					pp2++;
+				}
+				while(!l.empty() && abs(l.front() - *pp1) > k)
+					l.pop_front();
+				
+				for(ps = l.begin(); ps != l.end(); ps++)
+				{
+					list<int> positions;
+					positions.push_back(*pp1);
+					positions.push_back(*ps);
+					answer.push_back(Posting(p1->getDoc(), positions));
+				}
+
+				pp1++;					
+			}
+
+			p1++;
+			p2++;	
+		}
+		else if(docid1 < docid2)
+			p1++;
+		else
+			p2++;
+	}
+	
+	return answer;	
+}
+
+
+
+
 
 
 

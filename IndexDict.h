@@ -24,7 +24,11 @@ class IndexDict {
 		
 		bool isNot(string token, bool removeIfFound = false);
 		
-		list<Posting> get(string token); 
+		list<Posting> get(string token);
+		
+		list<Posting> getPositional(string token1, string token2, string token3);
+		list<Posting> positionalIntersect(string token1, string token2, int proximity);
+		
 		int getTotFreq(string token);
 		Index getIndex(string token);
 		

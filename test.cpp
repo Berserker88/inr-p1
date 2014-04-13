@@ -63,7 +63,7 @@ int main( int argc, char** argv )
 	//cout << "dict = " << dict.toString() << endl;
 	
 	//printRes(dict.get("hexe"), 0.0);
-	
+	/*
 	QueryParser qp(&dict);
 	string query;
 	
@@ -111,21 +111,11 @@ int main( int argc, char** argv )
 	
 	cout << "query: hexe AND könig" << endl;
 	printRes(res1, 0.0);
-	
-	/*
-	cout << "query: NOT könig" << endl;
-	printRes(res2);
-	//printRes(res3);
-	
-	cout << "query: NOT könig OR hexe" << endl;
-	printRes(res12);
-	//printRes(res123);
 	*/
 	
-	
-	
+	list<Posting> res = dict.positionalIntersect("es", "einmal", 2); 
 
-
+	printRes(res, 1234.56);
 	
 	return 0;
 }
