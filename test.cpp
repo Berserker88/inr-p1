@@ -19,7 +19,7 @@ using namespace std;
 
 void printRes(list<Posting> pl, float time) {
 	cout.precision(3);
-	cout << pl.size() << " results  -  took " << time << " s" << endl;
+	cout << endl << pl.size() << " results  -  took " << time << " s" << endl;
 	list<Posting>::iterator p_iter;
 	for(p_iter = pl.begin(); p_iter != pl.end(); p_iter++)
 		cout << p_iter->toString() << endl;
@@ -113,10 +113,12 @@ int main( int argc, char** argv )
 	printRes(res1, 0.0);
 	*/
 	
-	list<Posting> res = dict.positionalIntersect("es", "einmal", 2); 
+	list<Posting> res = dict.getPositional("es", "einmal", 2); 
+	list<Posting> res2 = dict.getPositional("es", "war", "einmal");
 
 	printRes(res, 1234.56);
-	
+	printRes(res2, 4556.78);	
+
 	return 0;
 }
 
