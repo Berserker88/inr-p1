@@ -26,8 +26,10 @@ class IndexDict {
 		
 		list<Posting> get(string token);
 		
+
 		list<Posting> getPositional(string token1, string token2, string token3);
-		list<Posting> positionalIntersect(string token1, string token2, int proximity);
+		list<Posting> getPositional(string token1, string token2, int proximity);
+		list<Posting> positionalIntersect(list<Posting> p1, list<Posting> p2, int proximity);
 		
 		int getTotFreq(string token);
 		Index getIndex(string token);

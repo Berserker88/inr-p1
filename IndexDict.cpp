@@ -446,21 +446,49 @@ list<Posting> IndexDict::unionLists(list<Posting> pl1, list<Posting> pl2) {
 
 list<Posting> IndexDict::getPositional(string token1, string token2, string token3) {
 	
-	// get postinglist of intersect
+	cout << token1 << " " << token2 << " " << token3 << endl;		
+	// get the postinglists of the three tokens
+	list<Posting> pl1 = get(token1);
+	list<Posting> pl2 = get(token2);
+	list<Posting> pl3 = get(token3);
+
+	list<Posting> res12 = positionalIntersect(pl1, pl2, 1);
+	list<Posting> res23 = positionalIntersect(pl2, pl3, 1);
+	list<Posting> res13 = positionalIntersect(pl1, pl3, 2);
 	
-	// positionalIntersect(token1, token2, 1)
-	// positionalIntersect(token2, token3, 1)
-	// positionalIntersect(token1, token3, 2)
+	list<Posting> res = intersect(res12, res23);
+	list<Posting> answer = intersect(res, res13);
 	
+	if(token1 == "")
+		return pl1;
+	else if(token2 == "")
+		return pl1;
+	else if(token3 == "")
+		return res12;
+	else
+		return answer;
 }
 
 
 
-list<Posting> IndexDict::positionalIntersect(string token1, string token2, int k) {
+list<Posting> IndexDict::getPositional(string token1, string token2, int proximity) {
 	
-	// positionalIntersect aus vorlesung
+	// get the postinglists of the two tokens
 	list<Posting> pl1 = get(token1);
 	list<Posting> pl2 = get(token2);
+
+	list<Posting> answer = positionalIntersect(pl1, pl2, proximity);
+	
+	return answer;
+}
+
+
+
+
+
+
+list<Posting> IndexDict::positionalIntersect(list<Posting> pl1, list<Posting> pl2, int k) {
+	
 	
 	list<Posting>::iterator p1 = pl1.begin();
 	list<Posting>::iterator p2 = pl2.begin();
