@@ -163,7 +163,7 @@ list<Posting> QueryParser::positionalParseAndExecute(string query)
         term1 = trim(term1);
         term2 = query.substr(end, string::npos);
         term2 = trim(term2);
-        //res = foo(term1,term2,space)
+        result = _dict->getPositional(term1, term2, space);
     }
     // Anfrage
     else
@@ -192,7 +192,7 @@ list<Posting> QueryParser::positionalParseAndExecute(string query)
         	term2=term3;
         	term3="";
         }
-        //res=foo(term1,term2,term3);
+        result = _dict->getPositional(term1,term2,term3);
     }
     return result;
 }
