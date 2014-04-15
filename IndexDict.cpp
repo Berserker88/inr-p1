@@ -444,7 +444,7 @@ list<Posting> IndexDict::unionLists(list<Posting> pl1, list<Posting> pl2) {
 
 
 
-list<Posting> IndexDict::getPositional(string token1, string token2, string token3) {
+list<Posting> IndexDict::phraseQuery(string token1, string token2, string token3) {
 	
 	cout << token1 << " " << token2 << " " << token3 << endl;		
 	// get the postinglists of the three tokens
@@ -471,7 +471,7 @@ list<Posting> IndexDict::getPositional(string token1, string token2, string toke
 
 
 
-list<Posting> IndexDict::getPositional(string token1, string token2, int proximity) {
+list<Posting> IndexDict::proximityQuery(string token1, string token2, int proximity) {
 	
 	// get the postinglists of the two tokens
 	list<Posting> pl1 = get(token1);
