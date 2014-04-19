@@ -59,7 +59,7 @@ int main( int argc, char** argv )
 	
 	
 	// build index of document list
-	dict.makeIndexFromList(docs);
+	dict.makeFuzzyIndexFromList(docs);
 	//cout << "dict = " << dict.toString() << endl;
 	
 	//printRes(dict.get("hexe"), 0.0);
@@ -113,8 +113,8 @@ int main( int argc, char** argv )
 	printRes(res1, 0.0);
 	*/
 	
-	list<Posting> res = dict.getPositional("es", "einmal", 2); 
-	list<Posting> res2 = dict.getPositional("es", "war", "einmal");
+	list<Posting> res = dict.proximityQuery("es", "einmal", 2); 
+	list<Posting> res2 = dict.phraseQuery("es", "war", "einmal");
 
 	printRes(res, 1234.56);
 	printRes(res2, 4556.78);	
