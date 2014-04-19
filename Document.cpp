@@ -25,6 +25,17 @@ int Document::getId() const {
 }
 
 
+list<string> Document::getContent() {
+	return _content;
+}
+
+
+void Document::addContent(string w) {
+	_content.push_back(w);
+}
+
+
+
 
 Document *Document::getDocFromFile(string filename) {
 	return new Document(filename);

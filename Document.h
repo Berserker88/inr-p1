@@ -11,12 +11,16 @@ class Document {
 	private:
 		string _filename;
 		int _id;
+		list<string> _content;
 		
 	public:
 		Document(string filename);
 		
 		string getFilename() const;
 		int getId() const;
+
+		list<string> getContent();
+		void addContent(string w);
 		
 		static Document *getDocFromFile(string filename);
 		static list<Document *> getDocsFromDir(string dirpath);
