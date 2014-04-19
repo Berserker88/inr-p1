@@ -19,6 +19,9 @@ class IndexDict {
 		void makeIndexFromList(list<Document *> doclist);
 		void makeIndexFromDoc(Document *doc);
 		
+		void makeFuzzyIndexFromList(list<Document *> doclist);
+		void makeFuzzyIndexFromDoc(Document *doc);
+		
 		void clear();
 		string toString() const;
 		
@@ -33,6 +36,7 @@ class IndexDict {
 		
 		int getTotFreq(string token);
 		Index getIndex(string token);
+		list<Index> getIndexList();
 		
 		list<Posting> intersect(list<string> terms);
 		list<Posting> intersect(list<Posting> pl1, list<Posting> pl2);

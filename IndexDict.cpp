@@ -8,6 +8,10 @@
 #include <iostream>
 #include <sstream>
 #include <queue>
+#include <fstream>
+
+#define Sj 0.05
+
 
 
 static string NOT_PREFIX = "NOT ";
@@ -59,6 +63,7 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	// adding Postings to dict
 	for(find_iter = positions.begin(); find_iter != positions.end(); find_iter++)
 	{
+		doc->addContent(find_iter->first);
 		string token = find_iter->first;
 		list<int> tok_pos = find_iter->second;
 		Posting p(doc, tok_pos);
@@ -95,6 +100,109 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	}
 	*/
 }
+
+
+
+list<Index> IndexDict::getIndexList() {
+	list<Index> res;
+	for(map<Index, list<Posting> >::iterator iter = _dict.begin(); iter != _dict.end(); iter++)
+		res.push_back(iter->first);
+	return res;
+}
+
+
+
+void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
+	makeIndexFromList(doclist);
+	
+
+
+	string filename = "jaccard";
+	bool file_exists = false;
+	fstream file(filename.c_str(), fstream::in);
+	if(file.is_open())
+	{
+		file_exists = true;
+		file.close();
+	}
+	
+	if(file_exists)
+	{
+		file.open(filename.c_str(), fstream::in);
+	}
+	else
+	{
+		file.open(filename.c_str(), fstream::out);
+	}
+
+	
+	list<Index> indexterms = getIndexList();
+	cout << "number of indices = " << indexterms.size() << endl;
+	list<Index>::iterator iterT, iterU;
+	map< pair<Index, Index> , double > jaccard;
+	int cnt = 1;
+
+	//for(iterT = indexterms.begin(); iterT != indexterms.end() && cnt < 500; iterT++)
+	for(iterT = indexterms.begin(); iterT != indexterms.end(); iterT++)
+	{	
+		//cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") start ...\n";
+		iterU = iterT;
+		iterU++;
+		for(iterU; iterU != indexterms.end(); iterU++)
+		{
+						
+			double c;
+			string tok1 = iterT->getToken();
+			string tok2 = iterU->getToken();
+			
+			if(file_exists)
+			{
+				file >> c;
+
+				//cout << "c = " << c << endl;
+			}
+			else
+			{
+				list<Posting> pl1, pl2, andlist, orlist;
+				pl1 = get(tok1);
+				pl2 = get(tok2);
+
+				andlist = intersect(pl1, pl2);
+				orlist = unionLists(pl1, pl2);
+				c = (double) andlist.size() / (double) orlist.size();
+				file << c << endl;
+			}
+			
+
+			if(c > Sj)
+			{
+				jaccard.insert(pair< pair<Index, Index>, double >(pair<Index, Index>(*iterT, *iterU), c));
+			}
+		}
+		cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") end ...\n";
+		cnt++;
+	}
+
+	file.close();
+	/*
+	list<Document *>::iterator iterD;
+	for(iterT = indexterms.begin(); iterT != indexterms.end(); iterT++)
+	{
+		for(iterD = _docs.begin(); iterD != _docs.end(); iterD++)
+		{
+			// TODO: query content from document and compute ogawa W(D, t)
+
+		}
+	}
+	*/
+}
+
+
+void IndexDict::makeFuzzyIndexFromDoc(Document *doc) {
+	makeIndexFromDoc(doc);
+}
+
+
 
 
 void IndexDict::addToDict(string token, Posting post) {
