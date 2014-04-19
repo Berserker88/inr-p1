@@ -13,6 +13,7 @@ using namespace std;
 Posting::Posting(Document *doc, int freq) {
 	_doc = doc;
 	_freq = freq;
+	_degree = 1;
 }
 
 
@@ -21,6 +22,7 @@ Posting::Posting(Document *doc, list<int> poss) {
 	_doc = doc;
 	_positions = poss;
 	_freq = _positions.size();
+	_degree = 1;
 }
 
 

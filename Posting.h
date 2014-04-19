@@ -10,6 +10,7 @@ class Posting {
 		Document *_doc;
 		int _freq;
 		list<int> _positions;
+		double _degree;
 		
 	public:
 		Posting(Document *doc, list<int> pos);
