@@ -26,6 +26,13 @@ Posting::Posting(Document *doc, list<int> poss) {
 }
 
 
+void Posting::setDegree(double deg) {
+	_degree = deg;
+}
+
+double Posting::getDegree() {
+	return _degree;
+}
 
 
 list<int> Posting::getPositions() {

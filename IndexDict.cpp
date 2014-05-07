@@ -137,11 +137,13 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 
 	
 	list<Index> indexterms = getIndexList();
-	cout << "number of indices = " << indexterms.size() << endl;
+	//cout << "number of indices = " << indexterms.size() << endl;
 	list<Index>::iterator iterT, iterU;
 	map< pair<Index, Index> , double > jaccard;
 	int cnt = 1;
 
+
+	cout << "computing/reading jaccard ..." << endl;
 	//for(iterT = indexterms.begin(); iterT != indexterms.end() && cnt < 500; iterT++)
 	for(iterT = indexterms.begin(); iterT != indexterms.end(); iterT++)
 	{	
@@ -179,11 +181,54 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 				jaccard.insert(pair< pair<Index, Index>, double >(pair<Index, Index>(*iterT, *iterU), c));
 			}
 		}
-		cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") end ...\n";
+		//cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") end ...\n";
 		cnt++;
 	}
 
 	file.close();
+	cout << "done!\n";
+
+	cout << "computing ogawa ..." << endl;
+	
+	for(map<Index, list<Posting> >::iterator iterM = _dict.begin(); iterM != _dict.end(); iterM++)
+	{	
+		Index t = iterM->first;
+		list<Posting> notContained = notList(iterM->second);
+		for(list<Posting>::iterator iterD = notContained.begin(); iterD != notContained.end(); iterD++)
+		{
+			double prod = 1.0;
+			list<string> content = iterD->getDoc()->getContent();
+			for(list<string>::iterator iterU = content.begin(); iterU != content.end(); iterU++)
+			{
+				Index u = getIndex(*iterU);
+				map< pair<Index, Index>, double >::iterator iterJ = jaccard.find(pair<Index, Index>(t, u));
+				if(iterJ == jaccard.end())
+				{
+					iterJ = jaccard.find(pair<Index, Index>(u, t));
+				}
+
+				if(iterJ != jaccard.end())
+				{
+					prod = prod * (1.0 - iterJ->second);
+				}
+			}
+			double ogawa = 1.0 - prod;
+
+			
+			if(ogawa > 0)
+			{
+				iterD->setDegree(ogawa);
+				addToDict(t->getToken(), *iterD);
+			}
+		}
+	}
+
+
+	cout << "done!\n";
+
+
+
+
 	/*
 	list<Document *>::iterator iterD;
 	for(iterT = indexterms.begin(); iterT != indexterms.end(); iterT++)
