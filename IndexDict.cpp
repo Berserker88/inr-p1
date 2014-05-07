@@ -183,7 +183,7 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 		}
 		//cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") end ...\n";
 		cnt++;
-		if((cnt * 100)  / 9700 == 25)
+		/*if((cnt * 100)  / 9700 == 25)
 		{
 			cout << "25%\n";
 		}	
@@ -194,7 +194,7 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 		if((cnt * 100)  / 9700 == 75)
 		{
 			cout << "75%\n";
-		}
+		}*/
 	}
 
 	file.close();
@@ -206,11 +206,11 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 	{	
 		cout << "start with token #" << cnt << " (" << iterM->first.getToken()  << ")\n";
 		int docnum = 1;
-		cout << "before index t\n";
+		//cout << "before index t\n";
 		Index t = iterM->first;
-		cout << "before notlist\n";
+		//cout << "before notlist\n";
 		list<Posting> notContained = notList(iterM->second);
-		cout << "before for-loop\n";
+		//cout << "before for-loop\n";
 		for(list<Posting>::iterator iterD = notContained.begin(); iterD != notContained.end(); iterD++)
 		{
 			//cout << "docnumber = " << docnum++ << endl;
@@ -229,12 +229,14 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 
 				if(iterJ != jaccard.end())
 				{
+					//cout << prod << " * " << "(1 - " << iterJ->second << ") = ";
 					prod = prod * (1.0 - iterJ->second);
+					//cout << prod << endl;
 				}
 			}
 			double ogawa = 1.0 - prod;
 
-			cout << "ogawa = " << ogawa << endl;
+			//cout << "ogawa = " << ogawa << endl;
 			if(ogawa > 0)
 			{
 				iterD->setDegree(ogawa);
@@ -242,8 +244,8 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 			}
 		}
 		cout << "done with token #" << cnt++ << " (" << t.getToken()  << ")\n";
-		/*if(cnt > 9)
-			break;*/
+		if(cnt > 9)
+			break;
 	}
 
 
