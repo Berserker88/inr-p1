@@ -218,7 +218,7 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 			if(ogawa > 0)
 			{
 				iterD->setDegree(ogawa);
-				addToDict(t->getToken(), *iterD);
+				addToDict(t.getToken(), *iterD);
 			}
 		}
 	}
