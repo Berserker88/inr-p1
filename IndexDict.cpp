@@ -183,23 +183,43 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 		}
 		//cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") end ...\n";
 		cnt++;
+		if((cnt * 100)  / 9700 == 25)
+		{
+			cout << "25%\n";
+		}	
+		if((cnt * 100)  / 9700 == 50)
+		{
+			cout << "50%\n";
+		}
+		if((cnt * 100)  / 9700 == 75)
+		{
+			cout << "75%\n";
+		}
 	}
 
 	file.close();
 	cout << "done!\n";
 
 	cout << "computing ogawa ..." << endl;
-	
+	cnt = 1;	
 	for(map<Index, list<Posting> >::iterator iterM = _dict.begin(); iterM != _dict.end(); iterM++)
 	{	
+		cout << "start with token #" << cnt << " (" << iterM->first.getToken()  << ")\n";
+		int docnum = 1;
+		cout << "before index t\n";
 		Index t = iterM->first;
+		cout << "before notlist\n";
 		list<Posting> notContained = notList(iterM->second);
+		cout << "before for-loop\n";
 		for(list<Posting>::iterator iterD = notContained.begin(); iterD != notContained.end(); iterD++)
 		{
+			//cout << "docnumber = " << docnum++ << endl;
 			double prod = 1.0;
 			list<string> content = iterD->getDoc()->getContent();
+			int toknum = 1;
 			for(list<string>::iterator iterU = content.begin(); iterU != content.end(); iterU++)
 			{
+				//cout << "toknum = " << toknum++ << endl;
 				Index u = getIndex(*iterU);
 				map< pair<Index, Index>, double >::iterator iterJ = jaccard.find(pair<Index, Index>(t, u));
 				if(iterJ == jaccard.end())
@@ -214,13 +234,16 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 			}
 			double ogawa = 1.0 - prod;
 
-			
+			cout << "ogawa = " << ogawa << endl;
 			if(ogawa > 0)
 			{
 				iterD->setDegree(ogawa);
 				addToDict(t.getToken(), *iterD);
 			}
 		}
+		cout << "done with token #" << cnt++ << " (" << t.getToken()  << ")\n";
+		/*if(cnt > 9)
+			break;*/
 	}
 
 
@@ -265,10 +288,13 @@ void IndexDict::addToDict(string token, Posting post) {
 		idx.addTotFreq(iter->first.getTotFreq());
 		idx.addNumDocs(iter->first.getNumDocs());
 		iter->second.push_back(post);
-		
+		iter->second.sort();
+	
+		/*
 		pair<Index, list<Posting> > p(idx, iter->second);
 		_dict.erase(iter);
 		_dict.insert(p);
+		*/
 	}
 }
 
@@ -522,6 +548,12 @@ list<Posting> IndexDict::notList(list<Posting> pl) {
 			answer.push_back(Posting(*p2));
 			p2++;
 		}
+		/*else
+		{
+			cout << "neeeeeeeetttt\n";
+			cout << "docid1 = " << docid1 << endl;
+			cout << "docid2 = " << docid2 << endl;
+		}*/
 	}
 	
 	// concatenate rest of second list and answer
