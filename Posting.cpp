@@ -66,7 +66,7 @@ string Posting::toString() const {
 	{
 		os << (*iter) << "; ";
 	}
-	os << ">";
+	os << ">; deg = " << _degree;
 	
 	return os.str();
 }
