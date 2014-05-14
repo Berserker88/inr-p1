@@ -43,6 +43,14 @@ class IndexDict {
 		list<Posting> unionLists(list<Posting> pl1, list<Posting> pl2);
 		list<Posting> notList(list<Posting> pl);
 		list<Posting> mergeAndNot(list<Posting> pl1, list<Posting> pl2);
+
+
+		list<Posting> intersectFuzzy(list<string> terms);
+		list<Posting> intersectFuzzy(list<Posting> pl1, list<Posting> pl2);
+		list<Posting> unionListsFuzzy(list<Posting> pl1, list<Posting> pl2);
+		list<Posting> notListFuzzy(list<Posting> pl);
+		list<Posting> mergeAndNotFuzzy(list<Posting> pl1, list<Posting> pl2);
+
 };
 
 

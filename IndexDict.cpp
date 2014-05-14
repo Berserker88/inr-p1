@@ -200,11 +200,32 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 	file.close();
 	cout << "done!\n";
 
-	cout << "computing ogawa ..." << endl;
+
+
+
+	filename = "ogawa";
+	file_exists = false;
+	file.open(filename.c_str(), fstream::in);
+	if(file.is_open())
+	{
+		file_exists = true;
+		file.close();
+	}
+	
+	if(file_exists)
+	{
+		file.open(filename.c_str(), fstream::in);
+	}
+	else
+	{
+		file.open(filename.c_str(), fstream::out);
+	}
+
+	cout << "computing/reading ogawa ..." << endl;
 	cnt = 1;	
 	for(map<Index, list<Posting> >::iterator iterM = _dict.begin(); iterM != _dict.end(); iterM++)
 	{	
-		cout << "start with token #" << cnt << " (" << iterM->first.getToken()  << ")\n";
+		//cout << "start with token #" << cnt << " (" << iterM->first.getToken()  << ")\n";
 		int docnum = 1;
 		//cout << "before index t\n";
 		Index t = iterM->first;
@@ -213,42 +234,52 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 		//cout << "before for-loop\n";
 		for(list<Posting>::iterator iterD = notContained.begin(); iterD != notContained.end(); iterD++)
 		{
-			//cout << "docnumber = " << docnum++ << endl;
-			double prod = 1.0;
-			list<string> content = iterD->getDoc()->getContent();
-			int toknum = 1;
-			for(list<string>::iterator iterU = content.begin(); iterU != content.end(); iterU++)
+			double ogawa = 0.0;
+			if(file_exists)
 			{
-				//cout << "toknum = " << toknum++ << endl;
-				Index u = getIndex(*iterU);
-				map< pair<Index, Index>, double >::iterator iterJ = jaccard.find(pair<Index, Index>(t, u));
-				if(iterJ == jaccard.end())
-				{
-					iterJ = jaccard.find(pair<Index, Index>(u, t));
-				}
-
-				if(iterJ != jaccard.end())
-				{
-					//cout << prod << " * " << "(1 - " << iterJ->second << ") = ";
-					prod = prod * (1.0 - iterJ->second);
-					//cout << prod << endl;
-				}
+				file >> ogawa;
 			}
-			double ogawa = 1.0 - prod;
+			else
+			{
+				//cout << "docnumber = " << docnum++ << endl;
+				double prod = 1.0;
+				list<string> content = iterD->getDoc()->getContent();
+				int toknum = 1;
+				for(list<string>::iterator iterU = content.begin(); iterU != content.end(); iterU++)
+				{
+					//cout << "toknum = " << toknum++ << endl;
+					Index u = getIndex(*iterU);
+					map< pair<Index, Index>, double >::iterator iterJ = jaccard.find(pair<Index, Index>(t, u));
+					if(iterJ == jaccard.end())
+					{
+						iterJ = jaccard.find(pair<Index, Index>(u, t));
+					}
+
+					if(iterJ != jaccard.end())
+					{
+						//cout << prod << " * " << "(1 - " << iterJ->second << ") = ";
+						prod = prod * (1.0 - iterJ->second);
+						//cout << prod << endl;
+					}
+				}
+				cout << "done with token #" << cnt++ << " (" << t.getToken()  << ")\n";
+				ogawa = 1.0 - prod;
+				file << ogawa << endl;
+			}
 
 			//cout << "ogawa = " << ogawa << endl;
-			if(ogawa > 0)
+			if(ogawa > 0.05)
 			{
 				iterD->setDegree(ogawa);
 				addToDict(t.getToken(), *iterD);
 			}
 		}
-		cout << "done with token #" << cnt++ << " (" << t.getToken()  << ")\n";
-		if(cnt > 9)
-			break;
+		//if(cnt > 9)
+		//	break;
 	}
 
 
+	file.close();
 	cout << "done!\n";
 
 
@@ -765,6 +796,271 @@ string IndexDict::toString() const {
 
 
 
+list<Posting> IndexDict::intersectFuzzy(list<string> tlist) {
+	
+	list<Posting> result;
+	
+	if(tlist.empty())
+		return result;
+	
+	// create priority queue to sort by increasing freaquency
+	priority_queue<Index, vector<Index>, CompareByFreq> terms(true);
+	
+
+	// get Index of strings
+	list<string>::iterator strIter;
+	for(strIter = tlist.begin(); strIter != tlist.end(); strIter++)
+	{
+		terms.push(getIndex(*strIter));
+	}
+	
+	
+	
+	// check if first in list is a NOT and fill result with first postinglist
+	if(isNot(terms.top().getToken()))
+	{
+		string token = terms.top().getToken();
+		token = token.substr(NOT_PREFIX.length(), string::npos);
+		result = notListFuzzy(get(token));
+		
+	}
+	else
+		result = get(terms.top().getToken());
+	terms.pop();
+	
+	
+	// call the appropriate algorithm for result and next term in list
+	while(!terms.empty() && !result.empty())
+	{
+		if(isNot(terms.top().getToken()))
+		{
+			string token = terms.top().getToken();
+			token = token.substr(NOT_PREFIX.length(), string::npos);
+			result = mergeAndNotFuzzy(result, get(token));
+		}
+		else
+			result = intersectFuzzy(result, get(terms.top().getToken()));
+		terms.pop();
+	}
+	
+	
+	return result;
+}
+
+
+
+
+
+
+
+
+
+
+list<Posting> IndexDict::mergeAndNotFuzzy(list<Posting> pl1, list<Posting> pl2) {
+	list<Posting> answer;
+	
+	// create pointer to first listelements
+	list<Posting>::iterator p1 = pl1.begin(), p2 = pl2.begin();
+	int docid1, docid2;
+	
+	// do until one is at the end of the list
+	while(p1 != pl1.end() && p2 != pl2.end())
+	{
+		// get doc ids
+		docid1 = p1->getDoc()->getId();
+		docid2 = p2->getDoc()->getId();
+		
+		// check what to do
+		if(docid1 == docid2)
+		{
+			double zp1 = p1->getDegree();
+			double zp2 = p2->getDegree();
+			if(zp1 < (1 - zp2))
+				answer.push_back(*p1);
+			else
+			{
+				Posting post(*p2);
+				post.setDegree(1 - zp2);
+				answer.push_back(post);
+			}
+			p1++;
+			p2++;
+		}
+		else if(docid1 < docid2)
+		{
+			answer.push_back(*p1);
+			p1++;
+		}
+		else
+		{
+			p2++;
+		}
+	}
+	
+	// concatenate rest of first list and answer
+	while(p1 != pl1.end())
+	{
+		answer.push_back(*p1);
+		p1++;
+	}
+	
+	return answer;
+}
+
+
+
+
+
+list<Posting> IndexDict::intersectFuzzy(list<Posting> pl1, list<Posting> pl2) {
+	list<Posting> answer;
+	
+	// create pointer to first listelements
+	list<Posting>::iterator p1 = pl1.begin(), p2 = pl2.begin();
+	int docid1, docid2;
+	
+	// do until one is at the end of the list
+	while(p1 != pl1.end() && p2 != pl2.end())
+	{
+		// get doc ids
+		docid1 = p1->getDoc()->getId();
+		docid2 = p2->getDoc()->getId();
+		
+
+		double zp1 = p1->getDegree();
+		double zp2 = p2->getDegree();
+
+		// check what to do
+		if(docid1 == docid2)
+		{
+			if(zp1 < zp2)
+				answer.push_back(*p1);
+			else
+				answer.push_back(*p2);
+			p1++;
+			p2++;
+		}
+		else if(docid1 < docid2)
+		{
+			p1++;
+		}
+		else
+		{
+			p2++;
+		}
+	}
+	
+	return answer;
+}
+
+
+
+
+list<Posting> IndexDict::notListFuzzy(list<Posting> pl) {
+	
+	list<Posting> answer;
+	
+	// create pointer to first listelements
+	list<Document *>::iterator p2 = _docs.begin();
+	list<Posting>::iterator p1 = pl.begin();
+	int docid1, docid2;
+	
+	// do until one is at the end of the list
+	while(p1 != pl.end() && p2 != _docs.end())
+	{
+		// get doc ids
+		docid1 = p1->getDoc()->getId();
+		docid2 = (*p2)->getId();
+		
+		
+		// check what to do
+		if(docid1 == docid2)
+		{
+			p1->setDegree(1 - p1->getDegree());
+			answer.push_back(*p1);
+			p1++;
+			p2++;
+		}
+		else if(docid2 < docid1)
+		{
+			answer.push_back(Posting(*p2));
+			p2++;
+		}
+		/*else
+		{
+			cout << "neeeeeeeetttt\n";
+			cout << "docid1 = " << docid1 << endl;
+			cout << "docid2 = " << docid2 << endl;
+		}*/
+	}
+	
+	// concatenate rest of second list and answer
+	while(p2 != _docs.end())
+	{
+		answer.push_back(Posting(*p2));
+		p2++;
+	}
+	
+	return answer;
+}
+
+
+
+
+list<Posting> IndexDict::unionListsFuzzy(list<Posting> pl1, list<Posting> pl2) {
+	list<Posting> answer;
+	
+	// create pointer to first listelements
+	list<Posting>::iterator p1 = pl1.begin(), p2 = pl2.begin();
+	int docid1, docid2;
+	
+
+	// do until one is at the end of the list
+	while(p1 != pl1.end() && p2 != pl2.end())
+	{
+		// get doc ids
+		docid1 = p1->getDoc()->getId();
+		docid2 = p2->getDoc()->getId();
+		
+		
+		// check what to do
+		if(docid1 == docid2)
+		{
+			if(p1->getDegree() > p2->getDegree())
+				answer.push_back(*p1);
+			else
+				answer.push_back(*p2);
+			p1++;
+			p2++;
+		}
+		else if(docid1 < docid2)
+		{
+			answer.push_back(*p1);
+			p1++;
+		}
+		else
+		{
+			answer.push_back(*p2);
+			p2++;
+		}
+	}
+	
+	// concatenate rest of first list and answer
+	while(p1 != pl1.end())
+	{
+		answer.push_back(*p1);
+		p1++;
+	}
+	
+	
+	// concatenate rest of second list and answer
+	while(p2 != pl2.end())
+	{
+		answer.push_back(*p2);
+		p2++;
+	}
+	
+	return answer;
+}
 
 
 
