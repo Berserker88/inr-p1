@@ -38,7 +38,7 @@ int main( int argc, char **argv )
 {
     if (argc < 2)
     {
-        cout << "usage: P1 <mode>" << endl << "\t <mode>= bool or positional" << endl;
+        cout << "usage: P1 <mode>" << endl << "\t <mode>= bool or positional or fuzzy" << endl;
         exit(0);
     }
     string mode = argv[1];
@@ -48,15 +48,16 @@ int main( int argc, char **argv )
     cout << "num of docs = " << docs.size() << endl;
     // create index dictionary
     IndexDict dict;
-    // build index of document list
-    dict.makeIndexFromList(docs);
-    QueryParser qp(&dict);
-    string query;
 
 
     double start, stop;
     if (mode.compare("bool") == 0)
     {
+    
+	    // build index of document list
+	    dict.makeIndexFromList(docs);
+	    QueryParser qp(&dict);
+	    string query;
         while (1)
         {
             cout << "\n\nenter your query: AND=(,) OR=()() q=exit" << endl;
@@ -74,6 +75,10 @@ int main( int argc, char **argv )
         }
     }
     else if(mode.compare("positional") == 0){
+	    // build index of document list
+	    dict.makeIndexFromList(docs);
+	    QueryParser qp(&dict);
+	    string query;
     	while (1)
         {
             cout << "\n\nenter your query: q=exit" << endl;
@@ -83,6 +88,26 @@ int main( int argc, char **argv )
             list<Posting> result;
             start = second();
             result = qp.positionalParseAndExecute(query);
+            stop = second();
+            cout << (float) start << endl;
+            cout << (float) stop << endl;
+            printRes(result, (stop - start) * 1000);
+        }
+    }
+    else if(mode.compare("fuzzy") == 0){
+	    // build index of document list
+	    dict.makeFuzzyIndexFromList(docs);
+	    QueryParser qp(&dict);
+	    string query;
+    	while (1)
+        {
+            cout << "\n\nenter your query: q=exit" << endl;
+            getline(cin, query);
+            if (query == "q")
+                break;
+            list<Posting> result;
+            start = second();
+            result = qp.fuzzyParseAndExecute(query);
             stop = second();
             cout << (float) start << endl;
             cout << (float) stop << endl;
