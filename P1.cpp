@@ -15,10 +15,13 @@ using namespace std;
 void printRes(list<Posting> pl, float time)
 {
     cout.precision(3);
-    cout << pl.size() << " results  -  took " << time << " ms" << endl;
+    cout << pl.size() << " results  -  took " << time << " ms" << endl << endl;
     list<Posting>::iterator p_iter;
+    int num = 1;
     for (p_iter = pl.begin(); p_iter != pl.end(); p_iter++)
-        cout << p_iter->toString() << endl;
+    {
+        cout << num++ << ".\t" << p_iter->toString() << endl;
+    }
     cout << endl;
 }
 
@@ -55,7 +58,11 @@ int main( int argc, char **argv )
     {
     
 	    // build index of document list
+	    start = second();
 	    dict.makeIndexFromList(docs);
+	    stop = second();
+	    cout << "generating dict was done in " << (stop - start) << " seconds" << endl;
+
 	    QueryParser qp(&dict);
 	    string query;
         while (1)
@@ -69,14 +76,18 @@ int main( int argc, char **argv )
             start = second();
             result = qp.parseAndExecute(query);
             stop = second();
-            cout << (float) start << endl;
-            cout << (float) stop << endl;
+            //cout << (float) start << endl;
+            //cout << (float) stop << endl;
             printRes(result, (stop - start) * 1000);
         }
     }
     else if(mode.compare("positional") == 0){
+	    
 	    // build index of document list
+	    start = second();
 	    dict.makeIndexFromList(docs);
+	    stop = second();
+	    cout << "generating dict was done in " << (stop - start) << " seconds" << endl;
 	    QueryParser qp(&dict);
 	    string query;
     	while (1)
@@ -89,14 +100,18 @@ int main( int argc, char **argv )
             start = second();
             result = qp.positionalParseAndExecute(query);
             stop = second();
-            cout << (float) start << endl;
-            cout << (float) stop << endl;
+            //cout << (float) start << endl;
+            //cout << (float) stop << endl;
             printRes(result, (stop - start) * 1000);
         }
     }
     else if(mode.compare("fuzzy") == 0){
-	    // build index of document list
+	    // build index of document list 
+	    start = second();
 	    dict.makeFuzzyIndexFromList(docs);
+	    stop = second();
+	    cout << "generating dict was done in " << (stop - start) << " seconds" << endl;
+
 	    QueryParser qp(&dict);
 	    string query;
     	while (1)
@@ -109,8 +124,8 @@ int main( int argc, char **argv )
             start = second();
             result = qp.fuzzyParseAndExecute(query);
             stop = second();
-            cout << (float) start << endl;
-            cout << (float) stop << endl;
+            //cout << (float) start << endl;
+            //cout << (float) stop << endl;
             printRes(result, (stop - start) * 1000);
         }
     }
