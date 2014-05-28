@@ -11,7 +11,9 @@ class IndexDict {
 	
 	private:
 		map<Index, list<Posting> > _dict;
+		map<string, list<string> > _kgrams;
 		list<Document *> _docs;
+
 		void addToDict(string token, Posting post);
 	
 	
@@ -22,6 +24,9 @@ class IndexDict {
 		void makeFuzzyIndexFromList(list<Document *> doclist);
 		void makeFuzzyIndexFromDoc(Document *doc);
 		
+		void makeTolerantIndexFromList(list<Document *> doclist);
+		void makeTolerantIndexFromDoc(Document *);
+
 		void clear();
 		string toString() const;
 		
@@ -50,6 +55,8 @@ class IndexDict {
 		list<Posting> unionListsFuzzy(list<Posting> pl1, list<Posting> pl2);
 		list<Posting> notListFuzzy(list<Posting> pl);
 		list<Posting> mergeAndNotFuzzy(list<Posting> pl1, list<Posting> pl2);
+		
+
 
 };
 
