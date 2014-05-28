@@ -183,18 +183,6 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 		}
 		//cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") end ...\n";
 		cnt++;
-		/*if((cnt * 100)  / 9700 == 25)
-		{
-			cout << "25%\n";
-		}	
-		if((cnt * 100)  / 9700 == 50)
-		{
-			cout << "50%\n";
-		}
-		if((cnt * 100)  / 9700 == 75)
-		{
-			cout << "75%\n";
-		}*/
 	}
 
 	file.close();
@@ -282,20 +270,6 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 	file.close();
 	cout << "done!\n";
 
-
-
-
-	/*
-	list<Document *>::iterator iterD;
-	for(iterT = indexterms.begin(); iterT != indexterms.end(); iterT++)
-	{
-		for(iterD = _docs.begin(); iterD != _docs.end(); iterD++)
-		{
-			// TODO: query content from document and compute ogawa W(D, t)
-
-		}
-	}
-	*/
 }
 
 

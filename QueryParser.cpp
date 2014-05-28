@@ -199,7 +199,9 @@ list<Posting> QueryParser::positionalParseAndExecute(string query)
 
 
 
-
+bool compareResults(const Posting& left, const Posting& right) {
+	return left.getDegree() > right.getDegree();
+}
 
 
 list<Posting> QueryParser::fuzzyParseAndExecute(string query)
@@ -226,7 +228,7 @@ list<Posting> QueryParser::fuzzyParseAndExecute(string query)
         {
             token = query.substr(begin, end - begin);
             cout << "\tAND " << endl;
-            res.push_back(andQuery(token));
+            res.push_back(fuzzyAndQuery(token));
         }
         begin = end + 1;
     }
@@ -243,6 +245,9 @@ list<Posting> QueryParser::fuzzyParseAndExecute(string query)
     {
         result = _dict->unionListsFuzzy(result, *(iter));
     }
+
+
+	result.sort(compareResults);
 
 
 

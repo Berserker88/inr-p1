@@ -22,7 +22,7 @@ class Posting {
 		void addPosition(int pos);
 	
 		void setDegree(double deg);
-		double getDegree();
+		double getDegree() const;
 
 		string toString() const;
 		
