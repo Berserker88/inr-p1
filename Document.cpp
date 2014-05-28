@@ -88,7 +88,7 @@ bool Document::operator>(const Document& doc) const {
 string Document::toString() const {
 	ostringstream os;
 	
-	os << _id << ": " << _filename;
+	os << _filename << " (" << _id << ")";;
 	return os.str();
 }
 

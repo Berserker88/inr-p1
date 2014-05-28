@@ -30,7 +30,7 @@ void Posting::setDegree(double deg) {
 	_degree = deg;
 }
 
-double Posting::getDegree() {
+double Posting::getDegree() const {
 	return _degree;
 }
 
@@ -60,13 +60,13 @@ int Posting::getFreq() const {
 string Posting::toString() const {
 	ostringstream os;
 	
-	os << _doc->toString() << "; " << _freq << "; <";
+	os << _doc->toString() << ";  freq = " << _freq << ";  deg = " << _degree << ";  <";
 	list<int>::const_iterator iter;
 	for(iter = _positions.begin(); iter != _positions.end(); iter++)
 	{
 		os << (*iter) << "; ";
 	}
-	os << ">; deg = " << _degree;
+	os << ">;";
 	
 	return os.str();
 }
