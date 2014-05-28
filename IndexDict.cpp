@@ -30,6 +30,18 @@ void IndexDict::makeIndexFromList(list<Document *> doclist) {
 
 
 
+
+
+
+void IndexDict::makeTolerantIndexFromDoc(Document *doc) {
+	makeIndexFromDoc(doc);
+}
+
+
+
+
+
+
 void IndexDict::makeIndexFromDoc(Document *doc) {
 	
 	
@@ -116,7 +128,7 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 	makeIndexFromList(doclist);
 	
 
-
+	// check if jaccard file already exists
 	string filename = "jaccard";
 	bool file_exists = false;
 	fstream file(filename.c_str(), fstream::in);
@@ -126,6 +138,7 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 		file.close();
 	}
 	
+	// open jaccard to read/write according to i it exists
 	if(file_exists)
 	{
 		file.open(filename.c_str(), fstream::in);
@@ -136,35 +149,35 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 	}
 
 	
+	// create jaccard map
 	list<Index> indexterms = getIndexList();
-	//cout << "number of indices = " << indexterms.size() << endl;
 	list<Index>::iterator iterT, iterU;
 	map< pair<Index, Index> , double > jaccard;
 	int cnt = 1;
 
 
 	cout << "computing/reading jaccard ..." << endl;
-	//for(iterT = indexterms.begin(); iterT != indexterms.end() && cnt < 500; iterT++)
+	// for every indexterm t ...
 	for(iterT = indexterms.begin(); iterT != indexterms.end(); iterT++)
 	{	
-		//cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") start ...\n";
 		iterU = iterT;
 		iterU++;
+		// for every indexterm u ...
 		for(iterU; iterU != indexterms.end(); iterU++)
 		{
-						
+				
 			double c;
 			string tok1 = iterT->getToken();
 			string tok2 = iterU->getToken();
 			
 			if(file_exists)
-			{
+			{	
+				// read jaccard(t, u) value from file
 				file >> c;
-
-				//cout << "c = " << c << endl;
 			}
 			else
 			{
+				// calculate jaccard(t, u) value ...
 				list<Posting> pl1, pl2, andlist, orlist;
 				pl1 = get(tok1);
 				pl2 = get(tok2);
@@ -172,25 +185,27 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 				andlist = intersect(pl1, pl2);
 				orlist = unionLists(pl1, pl2);
 				c = (double) andlist.size() / (double) orlist.size();
+				
+				// ... and write it to file
 				file << c << endl;
 			}
 			
-
+			// check jaccard value to met the requirements
 			if(c > Sj)
 			{
 				jaccard.insert(pair< pair<Index, Index>, double >(pair<Index, Index>(*iterT, *iterU), c));
 			}
 		}
-		//cout  << "token number " << cnt << " (" << iterT->getToken()  <<  ") end ...\n";
 		cnt++;
 	}
-
+	
+	// close jaccard file
 	file.close();
 	cout << "done!\n";
 
 
 
-
+	// check if ogawa file already exists
 	filename = "ogawa";
 	file_exists = false;
 	file.open(filename.c_str(), fstream::in);
@@ -200,6 +215,7 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 		file.close();
 	}
 	
+	// open ogawa file in read/write mode according to its existance
 	if(file_exists)
 	{
 		file.open(filename.c_str(), fstream::in);
@@ -210,32 +226,36 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 	}
 
 	cout << "computing/reading ogawa ..." << endl;
-	cnt = 1;	
+	cnt = 1;
+	
+	// for every indexterm m ...
 	for(map<Index, list<Posting> >::iterator iterM = _dict.begin(); iterM != _dict.end(); iterM++)
 	{	
-		//cout << "start with token #" << cnt << " (" << iterM->first.getToken()  << ")\n";
 		int docnum = 1;
-		//cout << "before index t\n";
 		Index t = iterM->first;
-		//cout << "before notlist\n";
+
+		// get all docs, that m not contains
 		list<Posting> notContained = notList(iterM->second);
-		//cout << "before for-loop\n";
+		
+		// for every document d, that m not contains
 		for(list<Posting>::iterator iterD = notContained.begin(); iterD != notContained.end(); iterD++)
 		{
 			double ogawa = 0.0;
 			if(file_exists)
 			{
+				// read ogawa value from file
 				file >> ogawa;
 			}
 			else
 			{
-				//cout << "docnumber = " << docnum++ << endl;
 				double prod = 1.0;
 				list<string> content = iterD->getDoc()->getContent();
 				int toknum = 1;
+				
+				// for every token u in document d
 				for(list<string>::iterator iterU = content.begin(); iterU != content.end(); iterU++)
 				{
-					//cout << "toknum = " << toknum++ << endl;
+					// check if jaccard(u, t) value exists
 					Index u = getIndex(*iterU);
 					map< pair<Index, Index>, double >::iterator iterJ = jaccard.find(pair<Index, Index>(t, u));
 					if(iterJ == jaccard.end())
@@ -245,25 +265,23 @@ void IndexDict::makeFuzzyIndexFromList(list<Document *> doclist) {
 
 					if(iterJ != jaccard.end())
 					{
-						//cout << prod << " * " << "(1 - " << iterJ->second << ") = ";
+						// compute ogawa
 						prod = prod * (1.0 - iterJ->second);
-						//cout << prod << endl;
 					}
 				}
-				cout << "done with token #" << cnt++ << " (" << t.getToken()  << ")\n";
 				ogawa = 1.0 - prod;
+				
+				// write ogawa value to file
 				file << ogawa << endl;
 			}
 
-			//cout << "ogawa = " << ogawa << endl;
+			// check ogawa value to met the requirements
 			if(ogawa > 0.05)
 			{
 				iterD->setDegree(ogawa);
 				addToDict(t.getToken(), *iterD);
 			}
 		}
-		//if(cnt > 9)
-		//	break;
 	}
 
 
