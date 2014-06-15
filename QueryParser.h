@@ -17,12 +17,14 @@ class QueryParser {
 		string trim(string token);
 		void printResult(list<Posting> pl);
 		list<Posting> fuzzyAndQuery(string query);
+		list<Posting> tolerantAndQuery(string query, int r);
 		
 	public:
 		QueryParser(IndexDict *dict);
 		list<Posting> parseAndExecute(string query);
 		list<Posting> positionalParseAndExecute(string query);
 		list<Posting> fuzzyParseAndExecute(string query);
+		list<Posting> tolerantParseAndExecute(string query, int r);
 };
 
 
