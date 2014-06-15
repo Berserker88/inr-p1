@@ -8,23 +8,31 @@
 #include <list>
 
 class IndexDict {
-	
+
 	private:
 		map<Index, list<Posting> > _dict;
 		map<string, list<string> > _kgrams;
 		list<Document *> _docs;
 
 		void addToDict(string token, Posting post);
-	
+		
+		double _thresh_j, _thresh_o;
+		int _k;
+		bool _ctwf;
 	
 	public:
+		IndexDict(bool combineTolWithFuz = false);
+
+		void setThresholdJaccard(double thresh);
+		void setThresholdOgawa(double thresh);
+
 		void makeIndexFromList(list<Document *> doclist);
 		void makeIndexFromDoc(Document *doc);
 		
 		void makeFuzzyIndexFromList(list<Document *> doclist);
 		void makeFuzzyIndexFromDoc(Document *doc);
 		
-		void makeTolerantIndexFromList(list<Document *> doclist);
+		void makeTolerantIndexFromList(list<Document *> doclist, int k);
 		void makeTolerantIndexFromDoc(Document *);
 
 		void clear();
@@ -55,8 +63,14 @@ class IndexDict {
 		list<Posting> unionListsFuzzy(list<Posting> pl1, list<Posting> pl2);
 		list<Posting> notListFuzzy(list<Posting> pl);
 		list<Posting> mergeAndNotFuzzy(list<Posting> pl1, list<Posting> pl2);
-		
+	
 
+
+		list<Posting> intersectTolerant(list<string> terms, int r);
+		void doCorrection(string token);
+		string getCorrToken(string token);
+		int dist(string tok1, string tok2);
+		int min3(int a, int b, int c);
 
 };
 
