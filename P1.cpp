@@ -179,6 +179,30 @@ int main( int argc, char **argv )
 			printRes(result, (stop - start) * 1000);
 		}
 	}
+	else if(mode.compare("vector") == 0)
+	{
+		start = second();
+		dict.makeVectorIndexFromList(docs);
+		stop = second();
+		
+		cout << "generating dict was done in " << (stop - start) << " seconds" << endl;
+
+		QueryParser qp(&dict);
+		string query;
+		while (1)
+		{
+			cout << "\n\nenter your query: q=exit" << endl;
+			getline(cin, query);
+			if (query == "q")
+				break;
+			list<Posting> result;
+			start = second();
+			result = qp.vectorParseAndExecute(query);
+			stop = second();
+			printRes(result, (stop - start) * 1000);
+		}
+
+	}
 	else
 	{
 		cout << "usage: P1 <mode>" << endl << "\t <mode>= bool or positional" << endl;

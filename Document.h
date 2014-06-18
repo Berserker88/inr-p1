@@ -15,7 +15,8 @@ class Document {
 		
 	public:
 		Document(string filename);
-		
+		Document(Document &doc);
+
 		string getFilename() const;
 		int getId() const;
 

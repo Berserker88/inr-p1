@@ -10,10 +10,11 @@ using namespace std;
 
 
 
-Posting::Posting(Document *doc, int freq) {
+Posting::Posting(Document *doc, int freq, float score) {
 	_doc = doc;
 	_freq = freq;
 	_degree = 1;
+	_score = score;
 }
 
 
@@ -23,6 +24,7 @@ Posting::Posting(Document *doc, list<int> poss) {
 	_positions = poss;
 	_freq = _positions.size();
 	_degree = 1;
+	_score = 0;
 }
 
 
@@ -60,7 +62,8 @@ int Posting::getFreq() const {
 string Posting::toString() const {
 	ostringstream os;
 	
-	os << _doc->toString() << ";  freq = " << _freq << ";  deg = " << _degree << ";  <";
+	os << _doc->toString() << ";  freq = " << _freq << ";  deg = " << _degree << "; score = " 
+		<< _score <<  ";  <";
 	list<int>::const_iterator iter;
 	for(iter = _positions.begin(); iter != _positions.end(); iter++)
 	{

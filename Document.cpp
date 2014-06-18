@@ -11,9 +11,15 @@ using namespace std;
 
 
 Document::Document(string filename) {
-	static int id = 1;
+	static int id = 0;
 	_id = id++;
 	_filename = filename;
+}
+
+Document::Document(Document &doc) {
+	_id = doc.getId();
+	_filename = doc.getFilename();
+	_content = doc.getContent();
 }
 		
 string Document::getFilename() const {

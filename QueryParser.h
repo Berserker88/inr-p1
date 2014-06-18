@@ -17,6 +17,7 @@ class QueryParser {
 		string trim(string token);
 		void printResult(list<Posting> pl);
 		list<Posting> fuzzyAndQuery(string query);
+		list<Posting> vectorAndQuery(string query);
 		list<Posting> tolerantAndQuery(string query, int r);
 		
 	public:
@@ -25,6 +26,7 @@ class QueryParser {
 		list<Posting> positionalParseAndExecute(string query);
 		list<Posting> fuzzyParseAndExecute(string query);
 		list<Posting> tolerantParseAndExecute(string query, int r);
+		list<Posting> vectorParseAndExecute(string query);
 };
 
 

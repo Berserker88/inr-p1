@@ -11,10 +11,11 @@ class Posting {
 		int _freq;
 		list<int> _positions;
 		double _degree;
+		float _score;
 		
 	public:
 		Posting(Document *doc, list<int> pos);
-		Posting(Document *doc, int freq = 0);
+		Posting(Document *doc, int freq = 0, float score = 0);
 		
 		Document *getDoc() const;
 		int getFreq() const;

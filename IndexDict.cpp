@@ -10,7 +10,7 @@
 #include <queue>
 #include <fstream>
 #include <climits>
-
+#include <cmath>
 
 
 static string NOT_PREFIX = "NOT ";
@@ -40,6 +40,18 @@ class CompareByFreq {
 
 
 
+
+struct VectorSort {
+	bool operator()(const float a, const float b) const {
+		return a > b;
+	}
+};
+
+
+
+
+
+
 // ==================================  Constructor  ==================================================
 
 IndexDict::IndexDict(bool combineTolWithFuz) {
@@ -64,6 +76,148 @@ void IndexDict::setThresholdOgawa(double thresh) {
 void IndexDict::setThresholdJaccard(double thresh) {
 	_thresh_o = thresh;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================  vector  ===========================================================
+
+
+
+void IndexDict::makeVectorIndexFromDoc(Document *doc) {
+	makeIndexFromDoc(doc);
+}
+
+
+void IndexDict::makeVectorIndexFromList(list<Document *> doclist) {
+	makeIndexFromList(doclist);
+
+/*
+	map<Index, list<Posting> >::iterator iter;
+
+	for(iter = _dict.begin(); iter != _dict.end(); iter++)
+	{
+		list<Document *>::iterator docIter = _docs.begin();
+		list<Posting>::iterator pl;
+		for(pl = iter->second.begin(); pl != iter->second.end(); iter++)
+		{
+			Document *doc = pl->getDoc();
+			for(; !(**docIter == *doc); docIter++)
+				_docVec[*docIter].push_back(0);
+
+			_docVec[doc].push_back(pl->getFreq());
+		}
+	}
+
+	cout << string(_docVec[_docs.front()].begin(), _docVec[_docs.front()].end()) << endl;
+	*/
+}
+
+int IndexDict::getNumber(string token) {
+	int num = 0;
+	map<Index, list<Posting> >::iterator it;
+	for(it = _dict.begin(); it != _dict.end(); it++)
+	{
+		if(it->first.getToken() == token)
+			return num;
+		num++;
+	}
+	return -1;
+}
+
+
+
+list<Posting> IndexDict::intersectVector(list<string> terms) {
+
+	list<Posting> result;
+	vector<int> queryVec(_dict.size(), 0);
+
+	// building query vector
+	for(list<string>::iterator it = terms.begin(); it != terms.end(); it++)
+	{
+		int pos = getNumber(*it);
+		if(pos >= 0)
+		{
+			queryVec[pos]++;
+		}
+		else
+			cout << "' " << *it  << "  ' not in Dictionary!\n";
+	}
+
+	return cosineScore(terms, queryVec);
+}
+
+
+
+
+
+
+list<Posting> IndexDict::cosineScore(list<string> terms, vector<int> qv) {
+	vector<float> scores(_docs.size(), 0);
+	list<Posting> result;
+	
+	map<Index, list<Posting> >::iterator dictIter = _dict.begin();
+	for(int i = 0; i < _dict.size(); i++, dictIter++)
+	{
+		if(qv[i] == 0)
+		{
+			continue;
+		}
+		
+		cout << "qv[" << i << "] != " << qv[i] << ";\n";
+		list<Posting>::iterator pIter;
+		int wtq = qv[i];
+		for(pIter = dictIter->second.begin(); pIter != dictIter->second.end(); pIter++)
+		{
+			int n = _docs.size();
+			int dft = dictIter->second.size();
+			int tfd = pIter->getFreq();
+			cout << "tfd(" << dictIter->first.getToken() << ") = " << tfd << endl;
+			float wtd = tfd * log(((float)n - (float)dft + 0.5) 
+					/ ((float)dft + 0.5));
+			scores[pIter->getDoc()->getId()] += (wtd * (float)wtq);
+		}
+	}
+
+	map<float, vector<Document *> > floatmap;
+	for(list<Document *>::iterator docIter = _docs.begin(); docIter != _docs.end(); docIter++) {
+		Document *doc = (*docIter);
+		scores[(*docIter)->getId()] /= (*docIter)->getContent().size();
+		floatmap[scores[doc->getId()]].push_back(doc);
+	}
+
+	sort(scores.begin(), scores.end(), VectorSort());
+
+	for(int i = 0; i < 26; i++)
+	{	
+		Posting p(floatmap[scores[i]][0], 0, scores[i]);
+		floatmap[scores[i]].erase(floatmap[scores[i]].begin());
+		result.push_back(p);
+	}
+	
+	return result;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

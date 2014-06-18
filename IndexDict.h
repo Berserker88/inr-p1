@@ -5,15 +5,17 @@
 #include "Index.h"
 #include "Posting.h"
 #include <map>
+#include <vector>
 #include <list>
 
 class IndexDict {
 
 	private:
 		map<Index, list<Posting> > _dict;
+		map<Document *, vector<int> > _docVec;
 		map<string, list<string> > _kgrams;
 		list<Document *> _docs;
-
+		
 		void addToDict(string token, Posting post);
 		
 		double _thresh_j, _thresh_o;
@@ -35,6 +37,10 @@ class IndexDict {
 		void makeTolerantIndexFromList(list<Document *> doclist, int k);
 		void makeTolerantIndexFromDoc(Document *);
 
+		void makeVectorIndexFromList(list<Document *> doclist);
+		void makeVectorIndexFromDoc(Document *);
+		int getNumber(string token);
+		
 		void clear();
 		string toString() const;
 		
@@ -71,7 +77,10 @@ class IndexDict {
 		string getCorrToken(string token);
 		int dist(string tok1, string tok2);
 		int min3(int a, int b, int c);
-
+		
+		
+		list<Posting> intersectVector(list<string> terms);
+		list<Posting> cosineScore(list<string> terms, vector<int> q);
 };
 
 
