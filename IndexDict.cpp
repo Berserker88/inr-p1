@@ -155,7 +155,8 @@ list<Posting> IndexDict::intersectVector(list<string> terms) {
 			cout << "' " << *it  << "  ' not in Dictionary!\n";
 	}
 
-	return cosineScore(terms, queryVec);
+	//return cosineScore(terms, queryVec);
+	return fastCosineScore(terms, queryVec);
 }
 
 
@@ -166,7 +167,7 @@ list<Posting> IndexDict::intersectVector(list<string> terms) {
 list<Posting> IndexDict::cosineScore(list<string> terms, vector<int> qv) {
 	vector<float> scores(_docs.size(), 0);
 	list<Posting> result;
-	
+
 	map<Index, list<Posting> >::iterator dictIter = _dict.begin();
 	for(int i = 0; i < _dict.size(); i++, dictIter++)
 	{
@@ -184,9 +185,11 @@ list<Posting> IndexDict::cosineScore(list<string> terms, vector<int> qv) {
 			int dft = dictIter->second.size();
 			int tfd = pIter->getFreq();
 			cout << "tfd(" << dictIter->first.getToken() << ") = " << tfd << endl;
-			float wtd = tfd * log(((float)n - (float)dft + 0.5) 
+			float wtd = tfd * log10(((float)n - (float)dft + 0.5) 
 					/ ((float)dft + 0.5));
 			scores[pIter->getDoc()->getId()] += (wtd * (float)wtq);
+			cout << "scores[" << pIter->getDoc()->getId() << "] = " << 
+				scores[pIter->getDoc()->getId()] << endl;
 		}
 	}
 
@@ -205,7 +208,7 @@ list<Posting> IndexDict::cosineScore(list<string> terms, vector<int> qv) {
 		floatmap[scores[i]].erase(floatmap[scores[i]].begin());
 		result.push_back(p);
 	}
-	
+
 	return result;
 }
 
@@ -215,8 +218,64 @@ list<Posting> IndexDict::cosineScore(list<string> terms, vector<int> qv) {
 
 
 
+list<Posting> IndexDict::fastCosineScore(list<string> terms, vector<int> qv) {
+	vector<float> scores(_docs.size(), 0);
+	list<Posting> result;
 
+	map<Index, list<Posting> >::iterator dictIter = _dict.begin();
+	for(int i = 0; i < _dict.size(); i++, dictIter++)
+	{
+		if(qv[i] == 0)
+		{
+			continue;
+		}
+		
+		cout << "qv[" << i << "] != " << qv[i] << ";\n";
+		list<Posting>::iterator pIter;
+		int wtq = qv[i];
+		for(pIter = dictIter->second.begin(); pIter != dictIter->second.end(); pIter++)
+		{
+			int n = _docs.size();
+			int docid = pIter->getDoc()->getId();
+			int dft = dictIter->second.size();
+			int tftd = pIter->getFreq();
+			cout << "tf(" << dictIter->first.getToken() << ", " << docid 
+				<< ") = " << tftd << endl;
+			cout << "dft(" << dictIter->first.getToken() << ") = " << dft << endl;
+			
+			float toLog = ((float)n - (float)dft + 0.5) / ((float)dft + 0.5);
+			float logged = log10(toLog);
+			cout << "toLog = " << toLog << endl;
+			cout << "log(toLog) = " << logged << endl;
+			float wtd = tftd * logged;
+			cout << "wtd = " << wtd << endl;
+			scores[docid] += wtd;
+			cout << "scores[" << docid << "] = " << 
+				scores[docid] << endl;
+			cout << endl;
+		}
+	}
 
+	map<float, vector<Document *> > floatmap;
+	for(list<Document *>::iterator docIter = _docs.begin(); docIter != _docs.end(); docIter++) {
+		Document *doc = (*docIter);
+		int length = doc->getContent().size();
+		cout << "length(" << doc->getId() << ") = " << length << endl;
+		scores[(*docIter)->getId()] /= length;
+		floatmap[scores[doc->getId()]].push_back(doc);
+	}
+
+	sort(scores.begin(), scores.end(), VectorSort());
+
+	for(int i = 0; i < 26; i++)
+	{	
+		Posting p(floatmap[scores[i]][0], 0, scores[i]);
+		floatmap[scores[i]].erase(floatmap[scores[i]].begin());
+		result.push_back(p);
+	}
+
+	return result;
+}
 
 
 

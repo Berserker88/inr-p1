@@ -81,6 +81,7 @@ class IndexDict {
 		
 		list<Posting> intersectVector(list<string> terms);
 		list<Posting> cosineScore(list<string> terms, vector<int> q);
+		list<Posting> fastCosineScore(list<string> terms, vector<int> q);
 };
 
 
