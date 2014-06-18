@@ -103,14 +103,14 @@ void IndexDict::makeVectorIndexFromDoc(Document *doc) {
 void IndexDict::makeVectorIndexFromList(list<Document *> doclist) {
 	makeIndexFromList(doclist);
 
-/*
+
 	map<Index, list<Posting> >::iterator iter;
 
 	for(iter = _dict.begin(); iter != _dict.end(); iter++)
 	{
 		list<Document *>::iterator docIter = _docs.begin();
 		list<Posting>::iterator pl;
-		for(pl = iter->second.begin(); pl != iter->second.end(); iter++)
+		for(pl = iter->second.begin(); pl != iter->second.end(); pl++)
 		{
 			Document *doc = pl->getDoc();
 			for(; !(**docIter == *doc); docIter++)
@@ -120,9 +120,15 @@ void IndexDict::makeVectorIndexFromList(list<Document *> doclist) {
 		}
 	}
 
-	cout << string(_docVec[_docs.front()].begin(), _docVec[_docs.front()].end()) << endl;
+	/*
+	ostringstream os;
+	map<Document *, vector<int> >::iterator it = _docVec.begin();
+	for(int i = 0; i < it->second.size(); i++)
+		os << "docVec[" << i << "] = " << it->second[i] << ", ";
+	cout << os.str() << endl;
 	*/
 }
+
 
 int IndexDict::getNumber(string token) {
 	int num = 0;
