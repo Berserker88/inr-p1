@@ -45,6 +45,7 @@ int main( int argc, char **argv )
 		exit(0);
 	}
 	string mode = argv[1];
+	string corpus = "CorpusUTF8";
 
 	double thresh_j = 0.7;
 	if(argc > 2)
@@ -56,11 +57,15 @@ int main( int argc, char **argv )
 			{
 				thresh_j = atof(argv[++i]);
 			}
+			else if(strcmp(argv[i], "-corpus") == 0 && argc >= i+1)
+			{
+				corpus = argv[++i];
+			}
 		}
 	}
 
 	// create documents from directory path
-	list<Document *> docs = Document::getDocsFromDir("CorpusUTF8");
+	list<Document *> docs = Document::getDocsFromDir(corpus);
 	// print documents loaded
 	cout << "num of docs = " << docs.size() << endl;
 	// create index dictionary
@@ -202,6 +207,30 @@ int main( int argc, char **argv )
 			printRes(result, (stop - start) * 1000);
 		}
 
+	}	
+	else if(mode.compare("topk") == 0)
+	{
+		start = second();
+		dict.makeTopkIndexFromList(docs);
+		stop = second();
+		
+		cout << "generating dict was done in " << (stop - start) << " seconds" << endl;
+
+		QueryParser qp(&dict);
+		string query;
+		while (1)
+		{
+			cout << "\n\nenter your query: q=exit" << endl;
+			getline(cin, query);
+			if (query == "q")
+				break;
+			list<Posting> result;
+			start = second();
+			result = qp.topkParseAndExecute(query);
+			stop = second();
+			printRes(result, (stop - start) * 1000);
+		}
+
 	}
 	else
 	{
@@ -210,3 +239,4 @@ int main( int argc, char **argv )
 	}
 	return 0;
 }
+
