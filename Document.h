@@ -12,6 +12,7 @@ class Document {
 		string _filename;
 		int _id;
 		list<string> _content;
+		list<string> _fullContent;
 		
 	public:
 		Document(string filename);
@@ -22,6 +23,9 @@ class Document {
 
 		list<string> getContent();
 		void addContent(string w);
+		void setFullContent(list<string> c);
+		list<string> getFullContent();
+		void printFullContent();
 		
 		static Document *getDocFromFile(string filename);
 		static list<Document *> getDocsFromDir(string dirpath);

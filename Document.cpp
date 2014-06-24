@@ -5,7 +5,7 @@
 #include "Document.h"
 #include "tinydir.h"
 #include <sstream>
-
+#include <iostream>
 
 using namespace std;
 
@@ -47,6 +47,22 @@ Document *Document::getDocFromFile(string filename) {
 	return new Document(filename);
 }
 
+
+
+void Document::setFullContent(list<string> c) {
+	_fullContent = c;
+}
+
+list<string> Document::getFullContent() {
+	return _fullContent;
+}
+
+
+
+void Document::printFullContent() {
+	for(list<string>::iterator it = _fullContent.begin(); it != _fullContent.end(); it++)
+		cout << *it << endl;
+}
 
 list<Document *> Document::getDocsFromDir(string dirpath) {
 	list<Document *> docs;
