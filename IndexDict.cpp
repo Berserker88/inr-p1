@@ -12,7 +12,6 @@
 #include <climits>
 #include <cmath>
 
-
 static string NOT_PREFIX = "NOT ";
 static string DEBUG = "hexe";
 
@@ -52,7 +51,7 @@ struct VectorSort {
 
 
 
-// ==================================  Constructor  ==================================================
+// ==================================  general  ==================================================
 
 IndexDict::IndexDict(bool combineTolWithFuz) {
 	
@@ -63,6 +62,7 @@ IndexDict::IndexDict(bool combineTolWithFuz) {
 	// just relevant for tolerant
 	_k = 0;
 	_ctwf = combineTolWithFuz;
+	_topk = 10;
 }
 
 
@@ -76,6 +76,318 @@ void IndexDict::setThresholdOgawa(double thresh) {
 void IndexDict::setThresholdJaccard(double thresh) {
 	_thresh_o = thresh;
 }
+
+
+int IndexDict::getNumber(string token) {
+	int num = 0;
+	map<Index, list<Posting> >::iterator it;
+	for(it = _dict.begin(); it != _dict.end(); it++)
+	{
+		if(it->first.getToken() == token)
+			return num;
+		num++;
+	}
+	return -1;
+}
+
+string IndexDict::getToken(int number) {
+	map<Index, list<Posting> >::iterator it;
+	int pos = 0;
+	for(it = _dict.begin(); it != _dict.end() && pos != number; it++, pos++)
+	{
+
+	}
+	if(it == _dict.end())
+		return "not in dict!";
+	
+	return it->first.getToken();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =============================  top k  ========================================================
+
+
+
+
+
+
+bool sortByIds(Document *d1, Document *d2) {
+	return ((*d1) < (*d2));
+}
+
+void IndexDict::makeTopkIndexFromDoc(Document *doc) {
+	makeIndexFromDoc(doc);
+}
+
+
+void IndexDict::makeTopkIndexFromList(list<Document *> doclist) {
+	
+	// indexing and creating the document vectors
+	makeVectorIndexFromList(doclist);
+
+
+	//srand(time(NULL));
+	cout << "generating leaders ... \n";
+
+	// randomly choose sqrt(N) leader documents
+	for(int i = 0; i < sqrt(_docs.size()); i++)
+	{
+		int randomDoc = rand() % _docs.size();
+		list<Document *>::iterator it = _docs.begin();
+		advance(it, randomDoc);
+		Document *doc = *it;
+		_leader.push_back(doc);
+		_cluster[doc];
+	}
+
+
+	// sort the leader docs
+	sort(_leader.begin(), _leader.end(), sortByIds);
+	
+	for(int i = 0; i < _leader.size(); i++)
+	{
+		cout << "leader " << i << " = " << _leader[i]->getId() << endl;
+	}
+
+	int debug = 0;
+	cout << "start clustering ...\n";
+	
+	// check for each document to which cluster it belongs
+	for(list<Document *>::iterator docIt = _docs.begin(); docIt != _docs.end(); docIt++)
+	{
+		
+		vector<int> docVec = _docVec[*docIt];
+		/*
+		cout << (*docIt)->toString() << endl;
+		(*docIt)->printFullContent();
+		for(int i = 0; i < docVec.size(); i++)
+		{
+			if(docVec[i] > 0)
+			{
+				cout << getToken(i)  << " = " << docVec[i] << endl;
+				count += docVec[i];;
+			}
+		}
+		*/
+		cout << (*docIt)->toString() << endl;
+		//cout << "doc size = " << (*docIt)->getFullContent().size() << endl;
+		
+		// compute scores of actual doc to all leaders
+		list<Posting> pl = cosineScore(_docVec[(*docIt)], _leader);
+		
+		// put actual document in cluster of leader with highest score
+		_cluster[pl.begin()->getDoc()].push_back(*docIt);
+	}
+
+
+	map<Document *, vector<Document *> >::iterator it;
+	for(it = _cluster.begin(); it != _cluster.end(); it++)
+	{
+		cout << "leader: " << it->first->toString() << endl;
+		cout << "cluster size = " << it->second.size() << endl << endl;
+	}
+
+	/*
+	list<string> content = (*_docs.begin())->getFullContent();
+	
+	for(list<string>::iterator it = content.begin(); it != content.end(); it++)
+	{
+		cout << *it << endl;
+	}
+	cout << "size = " << content.size() << endl;
+	*/
+}
+
+
+
+
+list<Posting> IndexDict::cosineScore(vector<int> qv, vector<Document *> docs) {
+	// initialize score for each document in docs
+	vector<float> scores(docs.size(), 0.0);
+	list<Posting> result;
+
+	
+	int n = _docs.size();
+	
+	
+	//sort(docs.begin(), docs.end(), sortByIds);
+
+	map<Index, list<Posting> >::iterator dictIter = _dict.begin();
+	for(int i = 0; i < _dict.size(); i++, dictIter++)
+	{
+		// if term t not in query, continue
+		if(qv[i] == 0)
+		{	
+			continue;
+		}
+
+		
+
+		int docIdx = 0;
+		vector<Document *>::iterator dIter = docs.begin();
+		list<Posting>::iterator pIter = dictIter->second.begin();
+		
+		// get global stats
+		int wtq = qv[i];
+		int dft = dictIter->second.size();
+		
+		/*	
+		for(pIter = dictIter->second.begin(); pIter != dictIter->second.end(); pIter++)
+		{
+			
+			for(dIter = docs.begin(), docIdx = 0; dIter!= docs.end(); dIter++, docIdx++)
+			{
+				if(pIter->getDoc()->getId() == (*dIter)->getId())
+					break;
+			}
+			if(dIter == docs.end())
+				continue;
+		*/		
+		while(1)
+		{
+
+			// for every posting of query term t, that matches any document of our docs
+			while(pIter != dictIter->second.end() && pIter->getDoc()->getId() < (*dIter)->getId())
+			{
+				pIter++;
+			}
+			if(pIter == dictIter->second.end())
+			{
+				break;
+			}
+
+			while(dIter != docs.end() && (*dIter)->getId() < pIter->getDoc()->getId())
+			{
+				dIter++;
+				docIdx++;
+			}
+			if(dIter == docs.end())
+			{
+				break;
+			}
+			if(pIter->getDoc()->getId() != (*dIter)->getId())
+				continue;
+			
+			
+
+			// get term frequency of the actual document
+			int tfd = pIter->getFreq();
+			
+			
+			// calculate weight of term t in document d
+			float wtd = tfd * log((n - dft + 0.5) / (dft + 0.5));
+			//cout << "wtd = " << wtd << endl;
+
+			// add weight to appropriate scores entry
+			scores[docIdx] += (wtd * wtq);
+			
+			// get next posting
+			pIter++;
+		}
+	}
+
+	
+	// normalizing scores and map the documents to their scores
+	map<float, vector<Document *> > floatmap;
+	for(int i = 0; i < scores.size(); i++)
+	{
+		Document *doc = docs[i];
+
+		scores[i] /= doc->getFullContent().size();
+		floatmap[scores[i]].push_back(doc);
+		//cout << "score " << i << " = " << scores[i] << endl;
+	}
+
+	// now sort the scores
+	sort(scores.begin(), scores.end(), VectorSort());
+
+	int k = _topk;
+	if(k > docs.size())
+		k = docs.size();
+	
+	// retrieve top k documents (with highest score)
+	for(int i = 0; i < k; i++)
+	{	
+		Posting p(floatmap[scores[i]][0], 0, scores[i]);
+		floatmap[scores[i]].erase(floatmap[scores[i]].begin());
+		result.push_back(p);
+	}
+	
+	return result;
+}
+
+
+
+
+list<Posting> IndexDict::intersectTopk(list<string> terms) {
+
+	list<Posting> result;
+	vector<int> queryVec(_dict.size(), 0);
+
+	// building query vector
+	for(list<string>::iterator it = terms.begin(); it != terms.end(); it++)
+	{
+		int pos = getNumber(*it);
+		string tok = getToken(pos);
+		cout << "query token = " << tok << endl;
+		if(pos >= 0)
+		{
+			queryVec[pos]++;
+		}
+		else
+			cout << "' " << *it  << "  ' not in Dictionary!\n";
+	}
+	
+
+	// first, calc scores of queryvector with all leaders
+	list<Posting> leaderScores = cosineScore(queryVec, _leader);
+
+	// obtain the leader with the best (highest) score
+	Document *clustLeader = leaderScores.begin()->getDoc();
+	cout << "leader = " << clustLeader->toString() << endl;
+
+	// obtain all documents out of that cluster
+	vector<Document *> cluster = _cluster[clustLeader];
+	cout << cluster.size() << endl;
+
+	// compute score of qv to all docs in that cluster
+	//result = cosineScore(queryVec, cluster);
+	
+	
+	
+	return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -106,20 +418,27 @@ void IndexDict::makeVectorIndexFromList(list<Document *> doclist) {
 
 	map<Index, list<Posting> >::iterator iter;
 
-	for(iter = _dict.begin(); iter != _dict.end(); iter++)
+	for(list<Document *>::iterator it = _docs.begin(); it != _docs.end(); it++)
 	{
-		list<Document *>::iterator docIter = _docs.begin();
+		_docVec[*it] = vector<int>(_dict.size(), 0);
+	}
+	int idx = 0;
+	for(iter = _dict.begin(); iter != _dict.end(); iter++, idx++)
+	{
 		list<Posting>::iterator pl;
 		for(pl = iter->second.begin(); pl != iter->second.end(); pl++)
 		{
 			Document *doc = pl->getDoc();
-			for(; !(**docIter == *doc); docIter++)
-				_docVec[*docIter].push_back(0);
-
-			_docVec[doc].push_back(pl->getFreq());
+			_docVec[doc][idx] = pl->getFreq();
 		}
 	}
-
+	
+	/*
+	for(map<Document *, vector<int> >::iterator it = _docVec.begin(); it != _docVec.end(); it++)
+	{
+		cout << it->second.size() << endl;
+	}
+	*/
 	/*
 	ostringstream os;
 	map<Document *, vector<int> >::iterator it = _docVec.begin();
@@ -130,17 +449,6 @@ void IndexDict::makeVectorIndexFromList(list<Document *> doclist) {
 }
 
 
-int IndexDict::getNumber(string token) {
-	int num = 0;
-	map<Index, list<Posting> >::iterator it;
-	for(it = _dict.begin(); it != _dict.end(); it++)
-	{
-		if(it->first.getToken() == token)
-			return num;
-		num++;
-	}
-	return -1;
-}
 
 
 
@@ -162,7 +470,7 @@ list<Posting> IndexDict::intersectVector(list<string> terms) {
 	}
 
 	//return cosineScore(terms, queryVec);
-	return fastCosineScore(terms, queryVec);
+	return fastCosineScore(queryVec);
 }
 
 
@@ -170,7 +478,14 @@ list<Posting> IndexDict::intersectVector(list<string> terms) {
 
 
 
-list<Posting> IndexDict::cosineScore(list<string> terms, vector<int> qv) {
+
+
+
+
+
+
+
+list<Posting> IndexDict::fastCosineScore(vector<int> qv) {
 	vector<float> scores(_docs.size(), 0);
 	list<Posting> result;
 
@@ -182,61 +497,7 @@ list<Posting> IndexDict::cosineScore(list<string> terms, vector<int> qv) {
 			continue;
 		}
 		
-		cout << "qv[" << i << "] != " << qv[i] << ";\n";
-		list<Posting>::iterator pIter;
-		int wtq = qv[i];
-		for(pIter = dictIter->second.begin(); pIter != dictIter->second.end(); pIter++)
-		{
-			int n = _docs.size();
-			int dft = dictIter->second.size();
-			int tfd = pIter->getFreq();
-			cout << "tfd(" << dictIter->first.getToken() << ") = " << tfd << endl;
-			float wtd = tfd * log10(((float)n - (float)dft + 0.5) 
-					/ ((float)dft + 0.5));
-			scores[pIter->getDoc()->getId()] += (wtd * (float)wtq);
-			cout << "scores[" << pIter->getDoc()->getId() << "] = " << 
-				scores[pIter->getDoc()->getId()] << endl;
-		}
-	}
-
-	map<float, vector<Document *> > floatmap;
-	for(list<Document *>::iterator docIter = _docs.begin(); docIter != _docs.end(); docIter++) {
-		Document *doc = (*docIter);
-		scores[(*docIter)->getId()] /= (*docIter)->getContent().size();
-		floatmap[scores[doc->getId()]].push_back(doc);
-	}
-
-	sort(scores.begin(), scores.end(), VectorSort());
-
-	for(int i = 0; i < 26; i++)
-	{	
-		Posting p(floatmap[scores[i]][0], 0, scores[i]);
-		floatmap[scores[i]].erase(floatmap[scores[i]].begin());
-		result.push_back(p);
-	}
-
-	return result;
-}
-
-
-
-
-
-
-
-list<Posting> IndexDict::fastCosineScore(list<string> terms, vector<int> qv) {
-	vector<float> scores(_docs.size(), 0);
-	list<Posting> result;
-
-	map<Index, list<Posting> >::iterator dictIter = _dict.begin();
-	for(int i = 0; i < _dict.size(); i++, dictIter++)
-	{
-		if(qv[i] == 0)
-		{
-			continue;
-		}
-		
-		cout << "qv[" << i << "] != " << qv[i] << ";\n";
+		//cout << "qv[" << i << "] != " << qv[i] << ";\n";
 		list<Posting>::iterator pIter;
 		int wtq = qv[i];
 		for(pIter = dictIter->second.begin(); pIter != dictIter->second.end(); pIter++)
@@ -245,35 +506,43 @@ list<Posting> IndexDict::fastCosineScore(list<string> terms, vector<int> qv) {
 			int docid = pIter->getDoc()->getId();
 			int dft = dictIter->second.size();
 			int tftd = pIter->getFreq();
-			cout << "tf(" << dictIter->first.getToken() << ", " << docid 
-				<< ") = " << tftd << endl;
-			cout << "dft(" << dictIter->first.getToken() << ") = " << dft << endl;
+			//cout << "tf(" << dictIter->first.getToken() << ", " << docid 
+			//	<< ") = " << tftd << endl;
+			//cout << "dft(" << dictIter->first.getToken() << ") = " << dft << endl;
 			
 			float toLog = ((float)n - (float)dft + 0.5) / ((float)dft + 0.5);
-			float logged = log10(toLog);
-			cout << "toLog = " << toLog << endl;
-			cout << "log(toLog) = " << logged << endl;
+			float logged = log(toLog);
+			//cout << "toLog = " << toLog << endl;
+			//cout << "log(toLog) = " << logged << endl;
 			float wtd = tftd * logged;
-			cout << "wtd = " << wtd << endl;
+			//cout << "wtd = " << wtd << endl;
 			scores[docid] += wtd;
-			cout << "scores[" << docid << "] = " << 
-				scores[docid] << endl;
-			cout << endl;
+			//cout << "scores[" << docid << "] = " << 
+			//	scores[docid] << endl;
+			//cout << endl;
 		}
 	}
+	
 
+	// map the documents to the appropriate, normalized scores
 	map<float, vector<Document *> > floatmap;
 	for(list<Document *>::iterator docIter = _docs.begin(); docIter != _docs.end(); docIter++) {
 		Document *doc = (*docIter);
-		int length = doc->getContent().size();
-		cout << "length(" << doc->getId() << ") = " << length << endl;
+		int length = doc->getFullContent().size();
+		//cout << "length(" << doc->getId() << ") = " << length << endl;
 		scores[(*docIter)->getId()] /= length;
 		floatmap[scores[doc->getId()]].push_back(doc);
 	}
 
+	// sort the scores
 	sort(scores.begin(), scores.end(), VectorSort());
 
-	for(int i = 0; i < 26; i++)
+	int k = _topk;
+	if(k > _docs.size())
+		k = _docs.size();
+
+	// return top k documents (with highest score)
+	for(int i = 0; i < k; i++)
 	{	
 		Posting p(floatmap[scores[i]][0], 0, scores[i]);
 		floatmap[scores[i]].erase(floatmap[scores[i]].begin());
@@ -629,7 +898,8 @@ void IndexDict::makeIndexFromDoc(Document *doc) {
 	
 	_docs.push_back(doc);
 	list<string> tokens = tokenize(doc->getFilename());
-	
+	doc->setFullContent(tokens);
+
 	// with positions
 	map<string, list<int> > positions;
 	map<string, list<int> >::iterator find_iter;

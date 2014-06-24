@@ -13,9 +13,13 @@ class IndexDict {
 	private:
 		map<Index, list<Posting> > _dict;
 		map<Document *, vector<int> > _docVec;
+		map<Document *, vector<Document *> > _cluster;
+		vector<Document *> _leader;
+		int _topk;
 		map<string, list<string> > _kgrams;
 		list<Document *> _docs;
 		
+
 		void addToDict(string token, Posting post);
 		
 		double _thresh_j, _thresh_o;
@@ -39,7 +43,13 @@ class IndexDict {
 
 		void makeVectorIndexFromList(list<Document *> doclist);
 		void makeVectorIndexFromDoc(Document *);
+	
+		void makeTopkIndexFromList(list<Document *> doclist);
+		void makeTopkIndexFromDoc(Document *);
+		
+		
 		int getNumber(string token);
+		string getToken(int number);
 		
 		void clear();
 		string toString() const;
@@ -80,8 +90,9 @@ class IndexDict {
 		
 		
 		list<Posting> intersectVector(list<string> terms);
-		list<Posting> cosineScore(list<string> terms, vector<int> q);
-		list<Posting> fastCosineScore(list<string> terms, vector<int> q);
+		list<Posting> intersectTopk(list<string> terms);
+		list<Posting> cosineScore(vector<int> qv, vector<Document *> docs);
+		list<Posting> fastCosineScore(vector<int> q);
 };
 
 
